@@ -1,3 +1,4 @@
+#include <fstream>
 #include "Graph.cpp"
 
 Graph readFromUser()
@@ -15,27 +16,35 @@ Graph readFromUser()
     return G;
 }
 
-Graph readFromFile()
+Graph readFromFile(const std::string& filename)
 {
-    Graph G(0);
+    std::fstream fs("..\\samples\\" + filename + ".in");
+
+    int V, E;
+    fs >> V >> E;
+
+    Graph G(V);
+    int c1, c2;
+    while (fs >> c1 >> c2) {
+        G.addEdge(c1, c2);
+    }
+
     return G;
 }
 
 Graph readFromTest()
 {
-    Graph G(5);
+    Graph G(6);
     G.addEdge(0, 1);
-    G.addEdge(0, 2);
     G.addEdge(1, 2);
     G.addEdge(2, 3);
-    G.addEdge(3, 3);
 
     return G;
 }
 
 int main()
 {
-    Graph G = readFromTest();
+    Graph G = readFromFile("small_4");
     G.print();
     G.dfs(2);
 
