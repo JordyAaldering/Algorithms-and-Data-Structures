@@ -32,15 +32,6 @@ Graph readFromFile(const std::string& filename)
     return G;
 }
 
-Graph readFromTest()
-{
-    Graph G(6);
-    G.addEdge(0, 1);
-    G.addEdge(1, 2);
-    G.addEdge(2, 3);
-    return G;
-}
-
 int main()
 {
     Graph G = readFromFile("small_4");
