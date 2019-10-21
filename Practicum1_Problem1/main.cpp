@@ -6,7 +6,7 @@ Graph readFromUser()
     int V, E;
     std::cin >> V >> E;
 
-    Graph G(V, E);
+    Graph G(V);
     for (int i = 0; i < E; i++) {
         int c1, c2;
         std::cin >> c1 >> c2;
@@ -23,7 +23,7 @@ Graph readFromFile(const std::string& filename)
     int V, E;
     fs >> V >> E;
 
-    Graph G(V, E);
+    Graph G(V);
     int c1, c2;
     while (fs >> c1 >> c2) {
         G.addEdge(c1, c2);

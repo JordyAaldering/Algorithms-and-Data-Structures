@@ -5,9 +5,7 @@ class Graph
 {
 private:
     int V; // amount of vertices
-    int E; // amount of edges
     std::vector<int>* G; // the graph
-
     bool *visited;
 
     int CCCount = 0; // amount of connected components
@@ -66,13 +64,11 @@ private:
     }
 
 public:
-    explicit Graph(int v, int e)
+    explicit Graph(int v)
     {
         this->V = v;
-        this->E = e;
         this->G = new std::vector<int>[v];
         this->CCS = new std::vector<int>[v];
-
         this->visited = new bool[V];
     }
 
