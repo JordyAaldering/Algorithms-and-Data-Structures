@@ -36,7 +36,9 @@ int main()
 {
     Graph G = readFromFile("small_4");
 
-    G.dfs();
+    G.calculateCCS();
+    G.calculateCCRoots();
+
     G.print();
 
     return 0;

@@ -4,18 +4,19 @@
 class Graph
 {
 private:
-    int V;
-    std::vector<int>* G;
+    int V; // amount of vertices
+    std::vector<int>* G; // the graph
 
-    int CCount;
-    std::vector<int>* CCS;
+    int CCount = 0; // amount of connected components
+    std::vector<int>* CCS; // the connected components
+    int* CRoots; // connected component vertices with most neighbors
+
 
 public:
     explicit Graph(int v)
     {
         this->V = v;
         this->G = new std::vector<int>[v];
-        this->CCount = 0;
         this->CCS = new std::vector<int>[v];
     }
 
@@ -38,7 +39,7 @@ public:
         }
     }
 
-    void dfs()
+    void calculateCCS()
     {
         bool *visited = new bool[V];
         for (int i = 0; i < V; i++) {
@@ -50,6 +51,25 @@ public:
                 dfsUtil(i, visited);
                 CCount++;
             }
+        }
+    }
+
+    void calculateCCRoots()
+    {
+        CRoots = new int[CCount];
+        for (int i = 0; i < CCount; i++) {
+            int bestRootIndex = -1;
+            int bestRootSize = -1;
+
+            for (int j : CCS[i]) {
+                int size = G[j].size();
+                if (size > bestRootSize) {
+                    bestRootIndex = j;
+                    bestRootSize = size;
+                }
+            }
+
+            CRoots[i] = bestRootIndex;
         }
     }
 
