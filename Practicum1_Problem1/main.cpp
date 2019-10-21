@@ -34,7 +34,7 @@ Graph readFromFile(const std::string& filename)
 
 int main()
 {
-    Graph G = readFromFile("small_4");
+    Graph G = readFromFile("small_11");
 
     G.calculateCCS();
     G.calculateCCRoots();

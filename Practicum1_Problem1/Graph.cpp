@@ -7,9 +7,9 @@ private:
     int V; // amount of vertices
     std::vector<int>* G; // the graph
 
-    int CCount = 0; // amount of connected components
+    int CCCount = 0; // amount of connected components
     std::vector<int>* CCS; // the connected components
-    int* CRoots; // connected component vertices with most neighbors
+    int* CCRoots; // connected component vertices with most neighbors
 
 
 public:
@@ -28,7 +28,7 @@ public:
 
     void dfsUtil(int i, bool *visited)
     {
-        CCS[CCount].push_back(i);
+        CCS[CCCount].push_back(i);
 
         visited[i] = true;
         std::vector<int>::iterator j;
@@ -49,15 +49,15 @@ public:
         for (int i = 0; i < V; i++) {
             if (!visited[i]) {
                 dfsUtil(i, visited);
-                CCount++;
+                CCCount++;
             }
         }
     }
 
     void calculateCCRoots()
     {
-        CRoots = new int[CCount];
-        for (int i = 0; i < CCount; i++) {
+        CCRoots = new int[CCCount];
+        for (int i = 0; i < CCCount; i++) {
             int bestRootIndex = -1;
             int bestRootSize = -1;
 
@@ -69,7 +69,7 @@ public:
                 }
             }
 
-            CRoots[i] = bestRootIndex;
+            CCRoots[i] = bestRootIndex;
         }
     }
 
@@ -84,13 +84,17 @@ public:
             std::cout << std::endl;
         }
 
-        for (int i = 0; i < CCount; i++)
+        for (int i = 0; i < CCCount; i++)
         {
             std::cout << "Connected Component: ";
             for (int j : CCS[i]) {
                 std::cout << j << ", ";
             }
             std::cout << std::endl;
+        }
+
+        for (int i = 0; i < CCCount; i++) {
+            std::cout << "CC root " << i << ": " << CCRoots[i] << std::endl;
         }
     }
 };
