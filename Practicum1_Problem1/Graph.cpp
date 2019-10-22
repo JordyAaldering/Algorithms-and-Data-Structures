@@ -43,11 +43,7 @@ int Graph::depthUtil(int i, int depth)
 
 std::pair<int, int> Graph::bfs(int s)
 {
-    int distances[V];
-    for (int i = 0; i < V; i++) {
-        distances[i] = -1;
-    }
-
+    short distances[V];
     std::list<int> queue;
     std::vector<int>::iterator i;
 
@@ -59,7 +55,7 @@ std::pair<int, int> Graph::bfs(int s)
         queue.pop_front();
 
         for (i = G[s].begin(); i != G[s].end(); i++) {
-            if (distances[*i] == -1) {
+            if (distances[*i] == 0) {
                 distances[*i] = distances[s] + 1;
                 queue.push_back(*i);
             }
@@ -84,7 +80,7 @@ Graph::Graph(int v)
     this->V = v;
     this->G = new std::vector<int>[v];
     this->CCS = new std::vector<int>[v];
-    this->visited = new bool[V];
+    this->visited = new bool[v];
 }
 
 void Graph::addEdge(int a, int b)
@@ -128,8 +124,8 @@ void Graph::calculateCCRootDepths()
 {
     CCRootDepths = new int[CCCount];
 
+    resetVisited();
     for (int i = 0; i < CCCount; i++) {
-        resetVisited();
         CCRootDepths[i] = depthUtil(CCRoots[i]);
     }
 }

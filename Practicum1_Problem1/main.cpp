@@ -29,8 +29,6 @@ Graph readFromFile(const std::string& filename)
         G.addEdge(c1, c2);
     }
 
-    fs.close();
-
     return G;
 }
 
@@ -40,47 +38,30 @@ int readExpected(const std::string& filename)
 
     int expected;
     fs >> expected;
-    fs.close();
-
     return expected;
-}
-
-void checkFile(const std::string& i)
-{
-    std::string filename = "small_" + i;
-
-    // std::cout << "Creating Graph..." << std::endl;
-    Graph G = readFromFile(filename);
-
-    // std::cout << "Calculating CCS..." << std::endl;
-    G.calculateCCS();
-
-    // std::cout << "Calculating Roots..." << std::endl;
-    G.calculateCCRoots();
-
-    // std::cout << "Calculating Depths..." << std::endl;
-    G.calculateCCRootDepths();
-
-    // std::cout << "Extending Graph..." << std::endl;
-    G.extendGraph();
-
-    // std::cout << "Calculating Path..." << std::endl;
-    int length = G.calculateLongestPath();
-    int expected = readExpected(filename);
-
-    //G.print();
-    std::cout << i << ")\t" << length << "\t" << expected << std::endl;
 }
 
 int main()
 {
-    std::string is[11] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" };
-    //std::string is[10] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
-    //std::string is[1] = { "11" };
+    std::string filename = "big_1";
 
-    for (const std::string& i : is) {
-        checkFile(i);
-    }
+    std::cout << "Creating Graph..." << std::endl;
+    Graph G = readFromFile(filename);
+    std::cout << "Calculating CCS..." << std::endl;
+    G.calculateCCS();
+    std::cout << "Calculating Roots..." << std::endl;
+    G.calculateCCRoots();
+    std::cout << "Calculating Depths..." << std::endl;
+    G.calculateCCRootDepths();
+    std::cout << "Extending Graph..." << std::endl;
+    G.extendGraph();
+
+    std::cout << "Calculating Path..." << std::endl;
+    int length = G.calculateLongestPath();
+    int expected = readExpected(filename);
+
+    //G.print();
+    std::cout << length << " " << expected << std::endl;
 
     return 0;
 }

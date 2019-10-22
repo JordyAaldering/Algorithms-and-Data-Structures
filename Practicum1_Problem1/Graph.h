@@ -3,15 +3,15 @@
 
 class Graph {
 private:
-    int V;  /// amount of vertices
-    bool *visited;  /// visited vertices
+    int V;            /// amount of vertices
+    int CCCount = 0;  /// amount of connected components
 
     std::vector<int>* G;    /// the graph as a linked list
     std::vector<int>* CCS;  /// the connected components (cc) as linked lists
 
-    int CCCount = 0;    /// amount of connected components
     int* CCRoots;       /// cc vertices with smallest depth of their cc
     int* CCRootDepths;  /// maximum depth of each cc root
+    bool* visited;      /// visited vertices
 
     void resetVisited();
 
