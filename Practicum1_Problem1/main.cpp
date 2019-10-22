@@ -70,7 +70,7 @@ void checkFile(const std::string& i)
     //G.print();
 
     int expected = readExpected(filename);
-    std::cout << i << ") " << length << "\t" << expected << std::endl;
+    std::cout << i << ")\t" << length << "\t" << expected << std::endl;
 }
 
 int main()
@@ -78,7 +78,6 @@ int main()
     //std::string is[10] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
     std::string is[1] = { "4" };
 
-    std::cout << "Clcltd\tXpctd" << std::endl;
     for (const std::string& i : is) {
         checkFile(i);
     }

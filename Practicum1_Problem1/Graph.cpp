@@ -9,7 +9,7 @@ void Graph::resetVisited()
     }
 }
 
-void Graph::ccsUtil(int i)
+void Graph::calculateCCSUtil(int i)
 {
     CCS[CCCount].push_back(i);
 
@@ -18,26 +18,26 @@ void Graph::ccsUtil(int i)
 
     for (j = G[i].begin(); j != G[i].end(); j++) {
         if (!visited[*j]) {
-            ccsUtil(*j);
+            calculateCCSUtil(*j);
         }
     }
 }
 
-int Graph::rootsUtil(int i, int depth)
+int Graph::calculateRootsUtil(int i, int depth)
 {
-    int newBestDepth = -1;
+    int newBiggestDepth = -1;
 
     visited[i] = true;
     std::vector<int>::iterator j;
 
     for (j = CCS[i].begin(); j != CCS[i].end(); j++) {
         if (!visited[*j]) {
-            int nextDepth = depthUtil(*j, depth + 1);
-            newBestDepth = std::max(newBestDepth, nextDepth);
+            int nextDepth = calculateRootsUtil(*j, depth + 1);
+            newBiggestDepth = std::max(newBiggestDepth, nextDepth);
         }
     }
 
-    return std::max(depth, newBestDepth);
+    return std::max(depth, newBiggestDepth);
 }
 
 int Graph::depthUtil(int i, int depth)
@@ -77,7 +77,7 @@ void Graph::calculateCCS()
 
     for (int i = 0; i < V; i++) {
         if (!visited[i]) {
-            ccsUtil(i);
+            calculateCCSUtil(i);
             CCCount++;
         }
     }
@@ -90,15 +90,15 @@ void Graph::calculateCCRoots()
         int bestRootIndex = -1;
         int bestRootDepth = 1000000;
 
-        for (int j : CCS[i]) {
+        //for (int j : CCS[i]) {
             resetVisited();
 
-            int depth = depthUtil(j);
+            int depth = calculateRootsUtil(i);
             if (depth < bestRootDepth) {
-                bestRootIndex = j;
+                bestRootIndex = i;
                 bestRootDepth = depth;
             }
-        }
+        //}
 
         CCRoots[i] = bestRootIndex;
     }

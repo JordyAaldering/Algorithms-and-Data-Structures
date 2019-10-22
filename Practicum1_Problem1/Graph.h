@@ -6,15 +6,17 @@ private:
 
     /// amount of vertices
     int V;
-    /// the graph as a linked list
-    std::vector<int>* G;
+
     /// visited vertices
     bool *visited;
 
+    /// the graph as a linked list
+    std::vector<int>* G;
+    /// the connected components (cc) as linked lists
+    std::vector<int>* CCS;
+
     /// amount of connected components
     int CCCount = 0;
-    /// the connected components (cc)
-    std::vector<int>* CCS;
     /// cc vertices with most neighbors
     int* CCRoots;
     /// maximum depth of each cc root
@@ -22,9 +24,9 @@ private:
 
     void resetVisited();
 
-    void ccsUtil(int i);
+    void calculateCCSUtil(int i);
 
-    int rootsUtil(int i, int depth = 0);
+    int calculateRootsUtil(int i, int depth = 0);
 
     int depthUtil(int i, int depth = 0);
 
