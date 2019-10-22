@@ -68,15 +68,15 @@ void checkFile(const std::string& i)
     int length = G.calculateLongestPath();
     int expected = readExpected(filename);
 
-    // G.print();
+    //G.print();
     std::cout << i << ")\t" << length << "\t" << expected << std::endl;
 }
 
 int main()
 {
     std::string is[11] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" };
-    // std::string is[10] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
-    // std::string is[1] = { "4" };
+    //std::string is[10] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
+    //std::string is[1] = { "11" };
 
     for (const std::string& i : is) {
         checkFile(i);

@@ -19,6 +19,8 @@ private:
 
     int depthUtil(int i, int depth = 0);
 
+    std::pair<int, int> bfs(int s);
+
 public:
     explicit Graph(int v);
 

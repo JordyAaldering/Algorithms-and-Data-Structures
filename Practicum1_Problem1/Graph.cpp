@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <list>
 #include "Graph.h"
 
 void Graph::resetVisited()
@@ -40,6 +41,44 @@ int Graph::depthUtil(int i, int depth)
     return std::max(depth, newBestDepth);
 }
 
+std::pair<int, int> Graph::bfs(int s)
+{
+    int distances[V];
+    for (int i = 0; i < V; i++) {
+        distances[i] = -1;
+    }
+
+    std::list<int> queue;
+    std::vector<int>::iterator i;
+
+    distances[s] = 0;
+    queue.push_back(s);
+
+    while (!queue.empty()) {
+        s = queue.front();
+        queue.pop_front();
+
+        for (i = G[s].begin(); i != G[s].end(); i++) {
+            if (distances[*i] == -1) {
+                distances[*i] = distances[s] + 1;
+                queue.push_back(*i);
+            }
+        }
+    }
+
+    int nodeIndex = 0;
+    int maxDistance = 0;
+
+    for (int j = 0; j < V; j++) {
+        if (distances[j] > maxDistance) {
+            nodeIndex = j;
+            maxDistance = distances[j];
+        }
+    }
+
+    return std::make_pair(nodeIndex, maxDistance);
+}
+
 Graph::Graph(int v)
 {
     this->V = v;
@@ -70,16 +109,15 @@ void Graph::calculateCCRoots()
 {
     CCRoots = new int[CCCount];
 
-    int bestRootIndex = -1;
-    int bestRootDepth = 10E6;
-
     for (int i = 0; i < CCCount; i++) {
-        resetVisited();
+        int bestRootIndex = 0;
+        int bestRootSize = 0;
 
-        int depth = depthUtil(i);
-        if (depth < bestRootDepth) {
-            bestRootIndex = i;
-            bestRootDepth = depth;
+        for (int j : CCS[i]) {
+            if (G[j].size() >= bestRootSize) {
+                bestRootIndex = j;
+                bestRootSize = G[j].size();
+            }
         }
 
         CCRoots[i] = bestRootIndex;
@@ -117,19 +155,11 @@ void Graph::extendGraph()
 
 int Graph::calculateLongestPath()
 {
-    int longestPath = 0;
+    std::pair<int, int> from, to;
+    from = bfs(0);
+    to = bfs(from.first);
 
-    if (CCCount == 1) {
-        return CCRootDepths[0];
-    }
-
-    for (int i = 0; i < CCCount - 1; i++) {
-        for (int j = i + 1; j < CCCount; j++) {
-            longestPath = std::max(longestPath, CCRootDepths[i] + CCRootDepths[j]);
-        }
-    }
-
-    return longestPath;
+    return std::max(0, to.second - 1);
 }
 
 void Graph::print()
