@@ -47,36 +47,36 @@ int readExpected(const std::string& filename)
 
 void checkFile(const std::string& i)
 {
-    std::string filename = "big_" + i;
+    std::string filename = "small_" + i;
 
-    std::cout << "Creating Graph..." << std::endl;
+    // std::cout << "Creating Graph..." << std::endl;
     Graph G = readFromFile(filename);
 
-    std::cout << "Calculating CCS..." << std::endl;
+    // std::cout << "Calculating CCS..." << std::endl;
     G.calculateCCS();
 
-    std::cout << "Calculating Roots..." << std::endl;
+    // std::cout << "Calculating Roots..." << std::endl;
     G.calculateCCRoots();
 
-    std::cout << "Calculating Depths..." << std::endl;
+    // std::cout << "Calculating Depths..." << std::endl;
     G.calculateCCRootDepths();
 
-    std::cout << "Extending Graph..." << std::endl;
+    // std::cout << "Extending Graph..." << std::endl;
     G.extendGraph();
 
-    std::cout << "Calculating Path..." << std::endl;
+    // std::cout << "Calculating Path..." << std::endl;
     int length = G.calculateLongestPath();
-
-    //G.print();
-
     int expected = readExpected(filename);
+
+    // G.print();
     std::cout << i << ")\t" << length << "\t" << expected << std::endl;
 }
 
 int main()
 {
-    //std::string is[10] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
-    std::string is[1] = { "4" };
+    std::string is[11] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" };
+    // std::string is[10] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
+    // std::string is[1] = { "4" };
 
     for (const std::string& i : is) {
         checkFile(i);

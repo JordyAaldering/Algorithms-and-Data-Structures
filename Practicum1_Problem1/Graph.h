@@ -3,30 +3,19 @@
 
 class Graph {
 private:
+    int V;  /// amount of vertices
+    bool *visited;  /// visited vertices
 
-    /// amount of vertices
-    int V;
+    std::vector<int>* G;    /// the graph as a linked list
+    std::vector<int>* CCS;  /// the connected components (cc) as linked lists
 
-    /// visited vertices
-    bool *visited;
-
-    /// the graph as a linked list
-    std::vector<int>* G;
-    /// the connected components (cc) as linked lists
-    std::vector<int>* CCS;
-
-    /// amount of connected components
-    int CCCount = 0;
-    /// cc vertices with most neighbors
-    int* CCRoots;
-    /// maximum depth of each cc root
-    int* CCRootDepths;
+    int CCCount = 0;    /// amount of connected components
+    int* CCRoots;       /// cc vertices with smallest depth of their cc
+    int* CCRootDepths;  /// maximum depth of each cc root
 
     void resetVisited();
 
-    void calculateCCSUtil(int i);
-
-    int calculateRootsUtil(int i, int depth = 0);
+    void ccsUtil(int i);
 
     int depthUtil(int i, int depth = 0);
 
