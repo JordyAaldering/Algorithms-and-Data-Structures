@@ -36,14 +36,14 @@ void createGraph(const std::string &filename) {
     }
 }
 
-void ccsUtil(int i) {
+void componentDFS(int i) {
     components[componentCount].push_back(i);
     visited[i] = true;
     std::vector<int>::iterator j;
 
     for (j = graph[i].begin(); j != graph[i].end(); j++) {
         if (!visited[*j]) {
-            ccsUtil(*j);
+            componentDFS(*j);
         }
     }
 }
@@ -55,7 +55,7 @@ void calculateComponents() {
 
     for (int i = 0; i < vertexCount; i++) {
         if (!visited[i]) {
-            ccsUtil(i);
+            componentDFS(i);
             componentCount++;
         }
     }
@@ -80,14 +80,14 @@ void calculateComponentRoots() {
     }
 }
 
-int depthUtil(int i, int depth) {
+int depthDFS(int i, int depth) {
     int newBestDepth = -1;
     visited[i] = true;
     std::vector<int>::iterator j;
 
     for (j = graph[i].begin(); j != graph[i].end(); j++) {
         if (!visited[*j]) {
-            int nextDepth = depthUtil(*j, depth + 1);
+            int nextDepth = depthDFS(*j, depth + 1);
             newBestDepth = std::max(newBestDepth, nextDepth);
         }
     }
@@ -101,7 +101,7 @@ void calculateComponentRootDepths() {
     resetVisited();
 
     for (int i = 0; i < componentCount; i++) {
-        componentRootDepths[i] = depthUtil(componentRoots[i], 0);
+        componentRootDepths[i] = depthDFS(componentRoots[i], 0);
     }
 }
 
