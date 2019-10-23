@@ -51,7 +51,6 @@ void ccsUtil(int i) {
 void calculateComponents() {
     std::cout << "Calculating Components..." << std::endl;
     components = new std::vector<int>[vertexCount];
-    //visited = new bool[vertexCount];
     visited.resize(vertexCount);
 
     for (int i = 0; i < vertexCount; i++) {
@@ -64,12 +63,11 @@ void calculateComponents() {
 
 void calculateComponentRoots() {
     std::cout << "Calculating Component Roots..." << std::endl;
-    //componentRoots = new int[componentCount];
     componentRoots.resize(componentCount);
 
     for (int i = 0; i < componentCount; i++) {
-        int bestRootIndex = 0;
-        int bestRootSize = 0;
+        int bestRootIndex = -1;
+        int bestRootSize = -1;
 
         for (int j : components[i]) {
             if (graph[j].size() >= bestRootSize) {
@@ -78,12 +76,12 @@ void calculateComponentRoots() {
             }
         }
 
-        componentRoots[i] = bestRootIndex;
+        componentRoots[i] = bestRootIndex == -1 ? components[i][0] : bestRootIndex;
     }
 }
 
 int depthUtil(int i, int depth) {
-    int newBestDepth = 0;
+    int newBestDepth = -1;
     visited[i] = true;
     std::vector<int>::iterator j;
 
@@ -99,7 +97,6 @@ int depthUtil(int i, int depth) {
 
 void calculateComponentRootDepths() {
     std::cout << "Calculating Component root depths..." << std::endl;
-    //componentRootDepths = new int[componentCount];
     componentRootDepths.resize(componentCount);
     resetVisited();
 
@@ -110,8 +107,8 @@ void calculateComponentRootDepths() {
 
 void connectComponents() {
     std::cout << "Connecting Components..." << std::endl;
-    int longestDepthIndex = 0;
-    int longestDepthSize = 0;
+    int longestDepthIndex = -1;
+    int longestDepthSize = -1;
 
     for (int i = 0; i < componentCount; i++) {
         if (componentRootDepths[i] > longestDepthSize) {
@@ -128,7 +125,6 @@ void connectComponents() {
 }
 
 std::pair<int, int> bfs(int s) {
-    //int distances[vertexCount];
     std::vector<int> distances(vertexCount);
     std::queue<int> queue;
     std::vector<int>::iterator i;
@@ -148,8 +144,8 @@ std::pair<int, int> bfs(int s) {
         }
     }
 
-    int nodeIndex = 0;
-    int maxDistance = 0;
+    int nodeIndex = -1;
+    int maxDistance = -1;
 
     for (int j = 0; j < vertexCount; j++) {
         if (distances[j] > maxDistance) {
@@ -179,7 +175,9 @@ int readExpected(const std::string &filename) {
 }
 
 int main() {
-    std::string filename = "big_1";
+    // failed: small_2, small_9, big_5, big_7, big_8, big_9, big_10
+    // overflowed: big_3
+    std::string filename = "big_10";
 
     createGraph(filename);
     calculateComponents();
