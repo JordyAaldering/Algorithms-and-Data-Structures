@@ -1,5 +1,5 @@
-#ifndef PRACTICUM1_PROBLEM1_GRAPH_H
-#define PRACTICUM1_PROBLEM1_GRAPH_H
+#ifndef PRACTICUM1_PROBLEM1_GRAPH_OLD_H
+#define PRACTICUM1_PROBLEM1_GRAPH_OLD_H
 
 class Graph {
 private:
@@ -24,7 +24,7 @@ private:
 public:
     explicit Graph(int v);
 
-    void addEdge(int a, int b);
+    void addEdge(int c1, int c2);
 
     void calculateCCS();
 
@@ -39,4 +39,4 @@ public:
     void print();
 };
 
-#endif //PRACTICUM1_PROBLEM1_GRAPH_H
+#endif //PRACTICUM1_PROBLEM1_GRAPH_OLD_H

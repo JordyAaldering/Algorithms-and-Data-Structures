@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <list>
-#include "Graph.h"
+#include "Graph.old.h"
 
 void Graph::resetVisited()
 {
@@ -83,10 +83,10 @@ Graph::Graph(int v)
     this->visited = new bool[v];
 }
 
-void Graph::addEdge(int a, int b)
+void Graph::addEdge(int c1, int c2)
 {
-    G[a].push_back(b);
-    G[b].push_back(a);
+    G[c1].push_back(c2);
+    G[c2].push_back(c1);
 }
 
 void Graph::calculateCCS()

@@ -3,4 +3,4 @@ project(Practicum1_Problem1)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(Practicum1_Problem1 main.cpp Graph.h)
+add_executable(Practicum1_Problem1 main.cpp)
