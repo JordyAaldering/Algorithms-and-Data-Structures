@@ -18,9 +18,7 @@ void addEdge(int c1, int c2) {
 }
 
 void resetVisited() {
-    for (int i = 0; i < vertexCount; i++) {
-        visited[i] = false;
-    }
+    std::fill(visited.begin(), visited.end(), false);
 }
 
 void createGraph(const std::string &filename) {
