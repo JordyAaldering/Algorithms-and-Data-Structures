@@ -88,7 +88,7 @@ void calculateComponentRoots() {
 
         assert(bestRootIndex >= 0);
         assert(bestRootSize >= 0);
-        componentRoots[i] = bestRootIndex; // == -1 ? components[i][0] : bestRootIndex;
+        componentRoots[i] = bestRootIndex;
     }
 }
 
@@ -202,7 +202,7 @@ int readExpected(const std::string &filename) {
 int main() {
     // failed: big_7, big_8, big_9, big_10
     // overflowed: big_3
-    std::string filename = "big_10";
+    std::string filename = "big_7";
 
     createGraph(filename);
     calculateConnectedComponents();
