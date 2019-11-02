@@ -18,10 +18,6 @@ void addEdge(int c1, int c2) {
     graph[c2].push_back(c1);
 }
 
-void resetVisited() {
-    std::fill(visited.begin(), visited.end(), false);
-}
-
 void createGraph(const std::string &filename) {
     std::cout << __func__ << std::endl;
     std::fstream fs("..\\samples\\" + filename + ".in");
@@ -32,16 +28,6 @@ void createGraph(const std::string &filename) {
 
     while (fs >> c1 >> c2) {
         addEdge(c1, c2);
-    }
-}
-
-void printGraph() {
-    for (int i = 0; i < vertexCount; i++) {
-        std::cout << "Adjacency list of " << i << ": head";
-        for (int j : graph[i]) {
-            std::cout << " -> " << j;
-        }
-        std::cout << std::endl;
     }
 }
 
@@ -70,7 +56,7 @@ void calculateConnectedComponents() {
     }
 }
 
-void calculateComponentRoots() {
+void calculateComponentRootsBySize() {
     std::cout << __func__ << std::endl;
     componentRoots.resize(componentCount);
 
@@ -99,8 +85,8 @@ int depthDFS(int i, int depth) {
 
     for (j = graph[i].begin(); j != graph[i].end(); j++) {
         if (!visited[*j]) {
-            int nextDepth = depthDFS(*j, depth + 1);
-            newBiggestDepth = std::max(newBiggestDepth, nextDepth);
+            int currentDepth = depthDFS(*j, depth + 1);
+            newBiggestDepth = std::max(newBiggestDepth, currentDepth);
         }
     }
 
@@ -109,10 +95,32 @@ int depthDFS(int i, int depth) {
     return newBiggestDepth;
 }
 
+void calculateComponentRootsByDepth() {
+    std::cout << __func__ << std::endl;
+    componentRoots.resize(componentCount);
+
+    for (int i = 0; i < componentCount; i++) {
+        int bestRootIndex = -1;
+        int bestRootDepth = -1;
+
+        for (int j : components[i]) {
+            int currentDepth = depthDFS(j, 0);
+            if (currentDepth > bestRootDepth) {
+                bestRootIndex = j;
+                bestRootDepth = currentDepth;
+            }
+        }
+
+        assert(bestRootIndex >= 0);
+        assert(bestRootDepth >= 0);
+        componentRoots[i] = bestRootIndex;
+    }
+}
+
 void calculateComponentRootDepths() {
     std::cout << __func__ << std::endl;
     componentRootDepths.resize(componentCount);
-    resetVisited();
+    std::fill(visited.begin(), visited.end(), false);
 
     for (int i = 0; i < componentCount; i++) {
         componentRootDepths[i] = depthDFS(componentRoots[i], 0);
@@ -200,13 +208,14 @@ int readExpected(const std::string &filename) {
 }
 
 int main() {
-    // failed: big_7, big_8, big_9, big_10
+    // RootsByDepth: small_4(+1), small_6(+2), small_7(+1), small_11(+1), big_7(+1), big_8(+9), big_9(+11), big_10(+11)
+    // RootsBySize: big_7, big_8, big_9, big_10
     // overflowed: big_3
-    std::string filename = "big_7";
+    std::string filename = "big_10";
 
     createGraph(filename);
     calculateConnectedComponents();
-    calculateComponentRoots();
+    calculateComponentRootsByDepth(); // BySize
     calculateComponentRootDepths();
     connectComponents();
 
