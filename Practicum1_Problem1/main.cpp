@@ -95,9 +95,10 @@ int depthDFS(int i, int depth) {
     return newBiggestDepth;
 }
 
-void calculateComponentRootsByDepth() {
+void calculateComponentRootsByMinDepth() {
     std::cout << __func__ << std::endl;
     componentRoots.resize(componentCount);
+    std::fill(visited.begin(), visited.end(), false);
 
     for (int i = 0; i < componentCount; i++) {
         int bestRootIndex = -1;
@@ -105,7 +106,7 @@ void calculateComponentRootsByDepth() {
 
         for (int j : components[i]) {
             int currentDepth = depthDFS(j, 0);
-            if (currentDepth > bestRootDepth) {
+            if (currentDepth < bestRootDepth || bestRootDepth == -1) {
                 bestRootIndex = j;
                 bestRootDepth = currentDepth;
             }
@@ -117,7 +118,7 @@ void calculateComponentRootsByDepth() {
     }
 }
 
-void calculateComponentRootDepths() {
+void calculateComponentRootMaxDepths() {
     std::cout << __func__ << std::endl;
     componentRootDepths.resize(componentCount);
     std::fill(visited.begin(), visited.end(), false);
@@ -127,7 +128,7 @@ void calculateComponentRootDepths() {
     }
 }
 
-void connectComponents() {
+void connectComponentsToBiggest() {
     std::cout << __func__ << std::endl;
     int longestDepthIndex = -1;
     int longestDepthSize = -1;
@@ -145,6 +146,14 @@ void connectComponents() {
     for (int i = 0; i < componentCount; i++) {
         if (componentRoots[i] != longestDepthIndex) {
             addEdge(componentRoots[i], longestDepthIndex);
+        }
+    }
+}
+
+void connectComponentsToAll() {
+    for (int i = 0; i < componentCount; i++) {
+        for (int j = i + 1; j < componentCount; j++) {
+            addEdge(componentRoots[i], componentRoots[j]);
         }
     }
 }
@@ -208,16 +217,19 @@ int readExpected(const std::string &filename) {
 }
 
 int main() {
-    // RootsByDepth: small_4(+1), small_6(+2), small_7(+1), small_11(+1), big_7(+1), big_8(+9), big_9(+11), big_10(+11)
-    // RootsBySize: big_7, big_8, big_9, big_10
+    // All Incomplete!
+    // RootsByMinDepth, ComponentsToBiggest: s11(+1), b7(+1), b8(+11), b9(+9), b10(+9)
+    // RootsByMinDepth, ComponentsToAll: s3(-1), s5(-1), s9(+1), s11(+1), b5(+2), b6(+2), b7(+1), b8(+11)
+    // RootsBySize, ComponentsToBiggest: b7, b8, b9, b10
+    // RootsBySize, ComponentsToAll:
     // overflowed: big_3
     std::string filename = "big_10";
 
     createGraph(filename);
     calculateConnectedComponents();
-    calculateComponentRootsByDepth(); // BySize
-    calculateComponentRootDepths();
-    connectComponents();
+    calculateComponentRootsByMinDepth();
+    calculateComponentRootMaxDepths();
+    connectComponentsToAll();
 
     int length = calculateLongestPath();
     int expected = readExpected(filename);
