@@ -200,9 +200,9 @@ int readExpected(const std::string &filename) {
 }
 
 int main() {
-    // failed: big_5, big_7, big_8, big_9, big_10
+    // failed: big_7, big_8, big_9, big_10
     // overflowed: big_3
-    std::string filename = "big_5";
+    std::string filename = "big_10";
 
     createGraph(filename);
     calculateConnectedComponents();
