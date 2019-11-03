@@ -33,17 +33,18 @@ int readFromFile(const std::string &filename) {
     fs = std::fstream("..\\samples\\" + filename + ".out");
     std::string expected;
     fs >> expected;
-    return expected.compare("impossible");
+    return expected == "possible";
 }
 
-std::pair<int, int> bfs() {
+/// \param The sizes of the bipartite orderings.
+/// \return Whether a bipartite ordering exists.
+bool bfs(std::pair<int, int>& sizes) {
     int colors[intersections];
     colors[0] = 1;
     for (int i = 1; i < intersections; ++i) {
         colors[i] = -1;
     }
 
-    std::pair<int, int> sizes;
     std::queue<int> q;
     q.push(0);
     while (!q.empty()) {
@@ -51,14 +52,19 @@ std::pair<int, int> bfs() {
         q.pop();
 
         for (auto v = graph[u].begin(); v != graph[u].end(); v++) {
-            if (graph[u][*v] && colors[*v] == -1) {
+            if (colors[*v] == -1) {
                 int color = 1 - colors[u];
                 colors[*v] = color;
-                color == 0 ? ++sizes.first : ++sizes.second;
+                color == 0 ? sizes.first++ : sizes.second++;
                 q.push(*v);
+            }
+            else if (colors[u] == colors[*v]) {
+                return false;
             }
         }
     }
+
+    return true;
 }
 
 void printGraph() {
@@ -73,11 +79,13 @@ void printGraph() {
 
 void run(const std::string& filename) {
     bool expected = readFromFile(filename);
-    std::pair<int, int> sizes = bfs();
-    bool actual = sizes.first >= bins || sizes.second >= bins;
 
+    std::pair<int, int> sizes;
+    bool bipartite = bfs(sizes);
+
+    bool calculated = bipartite && (sizes.first >= bins || sizes.second >= bins);
     std::cout << "Expected: " << (expected ? "possible" : "impossible")
-              << ", should be: " << (actual ? "possible" : "impossible")
+              << ", calculated: " << (calculated ? "possible" : "impossible")
               << std::endl;
 }
 
