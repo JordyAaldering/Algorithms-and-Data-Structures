@@ -30,6 +30,17 @@ void createGraph(const std::string &filename) {
     }
 }
 
+void dfs(int i) {
+    components[componentCount].push_back(i);
+    visited[i] = true;
+
+    for (int j : graph[i]) {
+        if (!visited[j]) {
+            dfs(j);
+        }
+    }
+}
+
 std::pair<int, int> bfs(int s) {
     std::vector<int> distances(vertexCount);
     std::fill(distances.begin(), distances.end(), -1);
@@ -38,15 +49,14 @@ std::pair<int, int> bfs(int s) {
     std::queue<int> queue;
     queue.push(s);
 
-    std::vector<int>::iterator i;
     while (!queue.empty()) {
         s = queue.front();
         queue.pop();
 
-        for (i = graph[s].begin(); i != graph[s].end(); i++) {
-            if (distances[*i] == -1) {
-                distances[*i] = distances[s] + 1;
-                queue.push(*i);
+        for (int i : graph[s]) {
+            if (distances[i] == -1) {
+                distances[i] = distances[s] + 1;
+                queue.push(i);
             }
         }
     }
@@ -67,18 +77,6 @@ std::pair<int, int> bfs(int s) {
     return std::make_pair(nodeIndex, maxDistance);
 }
 
-void connectedComponentDFS(int i) {
-    components[componentCount].push_back(i);
-    visited[i] = true;
-    std::vector<int>::iterator j;
-
-    for (j = graph[i].begin(); j != graph[i].end(); j++) {
-        if (!visited[*j]) {
-            connectedComponentDFS(*j);
-        }
-    }
-}
-
 void calculateConnectedComponents() {
     std::cout << __func__ << std::endl;
     components = new std::vector<int>[vertexCount];
@@ -86,27 +84,10 @@ void calculateConnectedComponents() {
 
     for (int i = 0; i < vertexCount; i++) {
         if (!visited[i]) {
-            connectedComponentDFS(i);
+            dfs(i);
             componentCount++;
         }
     }
-}
-
-int depthDFS(int i, int depth) {
-    int newBiggestDepth = -1;
-    visited[i] = true;
-    std::vector<int>::iterator j;
-
-    for (j = graph[i].begin(); j != graph[i].end(); j++) {
-        if (!visited[*j]) {
-            int currentDepth = depthDFS(*j, depth + 1);
-            newBiggestDepth = std::max(newBiggestDepth, currentDepth);
-        }
-    }
-
-    newBiggestDepth = std::max(newBiggestDepth, depth);
-    assert(newBiggestDepth >= 0);
-    return newBiggestDepth;
 }
 
 void calculateComponentRootsByShortestPath() {
@@ -135,36 +116,39 @@ void calculateComponentRootsByShortestPath() {
 void connectComponentsToBiggest() {
     std::cout << __func__ << std::endl;
 
-    int biggestComponent = 0;
+    int bestComponent = 0;
     for (int i = 1; i < componentCount; i++) {
-        if (componentRoots[i].second > componentRoots[biggestComponent].second) {
-            biggestComponent = i;
+        if (componentRoots[i].second > componentRoots[bestComponent].second) {
+            bestComponent = i;
         }
     }
 
     for (int i = 0; i < componentCount; i++) {
-        if (i != biggestComponent) {
-            addEdge(componentRoots[i].first, componentRoots[biggestComponent].first);
+        if (i != bestComponent) {
+            addEdge(componentRoots[i].first, componentRoots[bestComponent].first);
         }
     }
 }
 
 int calculateLongestPath() {
     std::cout << __func__ << std::endl;
-    int from = bfs(0).first;
-    std::pair<int, int> to = bfs(from);
+    std::pair<int, int> from, to;
+    from = bfs(0);
+    to = bfs(from.first);
+
     return std::max(0, to.second - 1);
 }
 
 int readExpected(const std::string &filename) {
     std::fstream fs("..\\samples\\" + filename + ".out");
+
     int expected;
     fs >> expected;
     return expected;
 }
 
 int main() {
-    std::string filename = "small_7";
+    std::string filename = "small_4";
 
     createGraph(filename);
     calculateConnectedComponents();
