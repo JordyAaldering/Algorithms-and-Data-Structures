@@ -10,8 +10,7 @@ std::vector<bool> visited;
 
 int componentCount = 0;
 std::vector<int>* components;
-std::vector<int> componentRoots;
-std::vector<int> componentRootDepths;
+std::vector<std::pair<int, int>> componentRoots;
 
 void addEdge(int c1, int c2) {
     graph[c1].push_back(c2);
@@ -29,6 +28,43 @@ void createGraph(const std::string &filename) {
     while (fs >> c1 >> c2) {
         addEdge(c1, c2);
     }
+}
+
+std::pair<int, int> bfs(int s) {
+    std::vector<int> distances(vertexCount);
+    std::fill(distances.begin(), distances.end(), -1);
+    distances[s] = 0;
+
+    std::queue<int> queue;
+    queue.push(s);
+
+    std::vector<int>::iterator i;
+    while (!queue.empty()) {
+        s = queue.front();
+        queue.pop();
+
+        for (i = graph[s].begin(); i != graph[s].end(); i++) {
+            if (distances[*i] == -1) {
+                distances[*i] = distances[s] + 1;
+                queue.push(*i);
+            }
+        }
+    }
+
+    int nodeIndex = -1;
+    int maxDistance = -1;
+
+    for (int j = 0; j < vertexCount; j++) {
+        if (distances[j] > maxDistance) {
+            nodeIndex = j;
+            maxDistance = distances[j];
+        }
+    }
+
+    assert(nodeIndex >= 0);
+    assert(maxDistance >= 0);
+
+    return std::make_pair(nodeIndex, maxDistance);
 }
 
 void connectedComponentDFS(int i) {
@@ -56,28 +92,6 @@ void calculateConnectedComponents() {
     }
 }
 
-void calculateComponentRootsBySize() {
-    std::cout << __func__ << std::endl;
-    componentRoots.resize(componentCount);
-
-    for (int i = 0; i < componentCount; i++) {
-        int bestRootIndex = -1;
-        int bestRootSize = -1;
-
-        for (int j : components[i]) {
-            int currentSize = graph[j].size();
-            if (currentSize > bestRootSize) {
-                bestRootIndex = j;
-                bestRootSize = currentSize;
-            }
-        }
-
-        assert(bestRootIndex >= 0);
-        assert(bestRootSize >= 0);
-        componentRoots[i] = bestRootIndex;
-    }
-}
-
 int depthDFS(int i, int depth) {
     int newBiggestDepth = -1;
     visited[i] = true;
@@ -95,141 +109,67 @@ int depthDFS(int i, int depth) {
     return newBiggestDepth;
 }
 
-void calculateComponentRootsByMinDepth() {
+void calculateComponentRootsByShortestPath() {
     std::cout << __func__ << std::endl;
     componentRoots.resize(componentCount);
     std::fill(visited.begin(), visited.end(), false);
 
     for (int i = 0; i < componentCount; i++) {
-        int bestRootIndex = -1;
-        int bestRootDepth = -1;
+        std::pair<int, int> bestRoot(-1, -1);
 
         for (int j : components[i]) {
-            int currentDepth = depthDFS(j, 0);
-            if (currentDepth < bestRootDepth || bestRootDepth == -1) {
-                bestRootIndex = j;
-                bestRootDepth = currentDepth;
+            std::pair<int, int> root = bfs(j);
+
+            if (root.second < bestRoot.second || bestRoot.second == -1) {
+                bestRoot = root;
             }
         }
 
-        assert(bestRootIndex >= 0);
-        assert(bestRootDepth >= 0);
-        componentRoots[i] = bestRootIndex;
-    }
-}
+        assert(bestRoot.first >= 0);
+        assert(bestRoot.second >= 0);
 
-void calculateComponentRootMaxDepths() {
-    std::cout << __func__ << std::endl;
-    componentRootDepths.resize(componentCount);
-    std::fill(visited.begin(), visited.end(), false);
-
-    for (int i = 0; i < componentCount; i++) {
-        componentRootDepths[i] = depthDFS(componentRoots[i], 0);
+        componentRoots[i] = bestRoot;
     }
 }
 
 void connectComponentsToBiggest() {
     std::cout << __func__ << std::endl;
-    int longestDepthIndex = -1;
-    int longestDepthSize = -1;
+
+    int biggestComponent = 0;
+    for (int i = 1; i < componentCount; i++) {
+        if (componentRoots[i].second > componentRoots[biggestComponent].second) {
+            biggestComponent = i;
+        }
+    }
 
     for (int i = 0; i < componentCount; i++) {
-        if (componentRootDepths[i] > longestDepthSize) {
-            longestDepthIndex = componentRoots[i];
-            longestDepthSize = componentRootDepths[i];
+        if (i != biggestComponent) {
+            addEdge(componentRoots[i].first, componentRoots[biggestComponent].first);
         }
     }
-
-    assert(longestDepthIndex >= 0);
-    assert(longestDepthSize >= 0);
-
-    for (int i = 0; i < componentCount; i++) {
-        if (componentRoots[i] != longestDepthIndex) {
-            addEdge(componentRoots[i], longestDepthIndex);
-        }
-    }
-}
-
-void connectComponentsToAll() {
-    for (int i = 0; i < componentCount; i++) {
-        for (int j = i + 1; j < componentCount; j++) {
-            addEdge(componentRoots[i], componentRoots[j]);
-        }
-    }
-}
-
-std::pair<int, int> bfs(int s) {
-    std::vector<int> distances(vertexCount);
-    std::fill(distances.begin(), distances.end(), -1);
-    distances[s] = 0;
-
-    std::queue<int> queue;
-    queue.push(s);
-
-    std::vector<int>::iterator i;
-    while (!queue.empty()) {
-        s = queue.front();
-        queue.pop();
-
-        for (i = graph[s].begin(); i != graph[s].end(); i++) {
-            if (distances[*i] == -1) {
-                distances[*i] = distances[s] + 1;
-                queue.push(*i);
-            }
-        }
-    }
-
-    for (int j = 0; j < vertexCount; j++) {
-        assert(distances[j] >= 0);
-    }
-
-    int nodeIndex = -1;
-    int maxDistance = -1;
-
-    for (int j = 0; j < vertexCount; j++) {
-        if (distances[j] > maxDistance) {
-            nodeIndex = j;
-            maxDistance = distances[j];
-        }
-    }
-
-    assert(nodeIndex >= 0);
-    assert(maxDistance >= 0);
-
-    return std::make_pair(nodeIndex, maxDistance);
 }
 
 int calculateLongestPath() {
     std::cout << __func__ << std::endl;
-    std::pair<int, int> from, to;
-    from = bfs(0);
-    to = bfs(from.first);
-
+    int from = bfs(0).first;
+    std::pair<int, int> to = bfs(from);
     return std::max(0, to.second - 1);
 }
 
 int readExpected(const std::string &filename) {
     std::fstream fs("..\\samples\\" + filename + ".out");
-
     int expected;
     fs >> expected;
     return expected;
 }
 
 int main() {
-    // All Incomplete!
-    // RootsByMinDepth, ComponentsToBiggest: s11(+1), b7(+1), b8(+11), b9(+9), b10(+9)
-    // RootsByMinDepth, ComponentsToAll: s3(-1), s5(-1), s9(+1), s11(+1), b5(+2), b6(+2), b7(+1), b8(+11)
-    // RootsBySize, ComponentsToBiggest: b7, b8, b9, b10
-    // RootsBySize, ComponentsToAll:
-    // overflowed: big_3
-    std::string filename = "big_10";
+    std::string filename = "small_7";
 
     createGraph(filename);
     calculateConnectedComponents();
-    calculateComponentRootsByMinDepth();
-    calculateComponentRootMaxDepths();
-    connectComponentsToAll();
+    calculateComponentRootsByShortestPath();
+    connectComponentsToBiggest();
 
     int length = calculateLongestPath();
     int expected = readExpected(filename);
