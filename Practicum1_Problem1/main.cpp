@@ -2,7 +2,6 @@
 #include <fstream>
 #include <vector>
 #include <queue>
-#include <cassert>
 
 int vertexCount = 0;
 std::vector<int>* graph;
@@ -46,6 +45,19 @@ void dfs(int i) {
     }
 }
 
+void calculateConnectedComponents() {
+    std::cout << __func__ << std::endl;
+    components = new std::vector<int>[vertexCount];
+    visited.resize(vertexCount);
+
+    for (int i = 0; i < vertexCount; i++) {
+        if (!visited[i]) {
+            dfs(i);
+            componentCount++;
+        }
+    }
+}
+
 std::pair<int, int> bfs(int s) {
     std::vector<int> distances(vertexCount);
     std::fill(distances.begin(), distances.end(), -1);
@@ -66,30 +78,50 @@ std::pair<int, int> bfs(int s) {
         }
     }
 
-    int nodeIndex = 0;
-    int maxDistance = distances[0];
-
+    std::pair<int, int> pair(0, distances[0]);
     for (int j = 1; j < vertexCount; j++) {
-        if (distances[j] > maxDistance) {
-            nodeIndex = j;
-            maxDistance = distances[j];
+        if (distances[j] > pair.second) {
+            pair = std::make_pair(j, distances[j]);
         }
     }
 
-    return std::make_pair(nodeIndex, maxDistance);
+    return pair;
 }
 
-void calculateConnectedComponents() {
-    std::cout << __func__ << std::endl;
-    components = new std::vector<int>[vertexCount];
-    visited.resize(vertexCount);
+std::pair<int, int> bfs(int s, int maxDistance) {
+    std::vector<int> distances(vertexCount);
+    std::fill(distances.begin(), distances.end(), -1);
+    distances[s] = 0;
 
-    for (int i = 0; i < vertexCount; i++) {
-        if (!visited[i]) {
-            dfs(i);
-            componentCount++;
+    std::queue<int> queue;
+    queue.push(s);
+    bool loop = true;
+
+    while (!queue.empty() && loop) {
+        s = queue.front();
+        queue.pop();
+
+        for (int i : graph[s]) {
+            if (distances[i] == -1) {
+                distances[i] = distances[s] + 1;
+                queue.push(i);
+
+                if (distances[i] >= maxDistance) {
+                    loop = false;
+                    break;
+                }
+            }
         }
     }
+
+    std::pair<int, int> pair(0, distances[0]);
+    for (int j = 1; j < vertexCount; j++) {
+        if (distances[j] > pair.second) {
+            pair = std::make_pair(j, distances[j]);
+        }
+    }
+
+    return pair;
 }
 
 void calculateComponentRootsByShortestPath() {
@@ -98,20 +130,9 @@ void calculateComponentRootsByShortestPath() {
     std::fill(visited.begin(), visited.end(), false);
 
     for (int i = 0; i < componentCount; i++) {
-        std::pair<int, int> bestRoot(-1, -1);
-
-        for (int j : components[i]) {
-            std::pair<int, int> root = bfs(j);
-            if (root.second < bestRoot.second || bestRoot.first == -1) {
-                bestRoot.first = j;
-                bestRoot.second = root.second;
-            }
-        }
-
-        assert(bestRoot.first >= 0);
-        assert(bestRoot.second >= 0);
-
-        componentRoots[i] = bestRoot;
+        std::pair<int, int> from = bfs(components[i][0]);
+        int distance = (int) from.second / 2;
+        componentRoots[i] = bfs(from.first, distance);
     }
 }
 
@@ -150,7 +171,7 @@ void printGraph() {
 }
 
 int main() {
-    int expected = createGraph("big_1");
+    int expected = createGraph("small_10");
     calculateConnectedComponents();
     calculateComponentRootsByShortestPath();
     connectComponentsToBiggest();
