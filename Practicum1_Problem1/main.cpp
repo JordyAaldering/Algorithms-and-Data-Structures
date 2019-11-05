@@ -17,7 +17,7 @@ void addEdge(int c1, int c2) {
     graph[c2].push_back(c1);
 }
 
-void createGraph(const std::string &filename) {
+int createGraph(const std::string &filename) {
     std::cout << __func__ << std::endl;
     std::fstream fs("..\\samples\\" + filename + ".in");
 
@@ -28,6 +28,11 @@ void createGraph(const std::string &filename) {
     while (fs >> c1 >> c2) {
         addEdge(c1, c2);
     }
+
+    fs = std::fstream("..\\samples\\" + filename + ".out");
+    int expected;
+    fs >> expected;
+    return expected;
 }
 
 void dfs(int i) {
@@ -61,18 +66,15 @@ std::pair<int, int> bfs(int s) {
         }
     }
 
-    int nodeIndex = -1;
-    int maxDistance = -1;
+    int nodeIndex = 0;
+    int maxDistance = distances[0];
 
-    for (int j = 0; j < vertexCount; j++) {
+    for (int j = 1; j < vertexCount; j++) {
         if (distances[j] > maxDistance) {
             nodeIndex = j;
             maxDistance = distances[j];
         }
     }
-
-    assert(nodeIndex >= 0);
-    assert(maxDistance >= 0);
 
     return std::make_pair(nodeIndex, maxDistance);
 }
@@ -100,9 +102,9 @@ void calculateComponentRootsByShortestPath() {
 
         for (int j : components[i]) {
             std::pair<int, int> root = bfs(j);
-
-            if (root.second < bestRoot.second || bestRoot.second == -1) {
-                bestRoot = root;
+            if (root.second < bestRoot.second || bestRoot.first == -1) {
+                bestRoot.first = j;
+                bestRoot.second = root.second;
             }
         }
 
@@ -132,31 +134,30 @@ void connectComponentsToBiggest() {
 
 int calculateLongestPath() {
     std::cout << __func__ << std::endl;
-    std::pair<int, int> from, to;
-    from = bfs(0);
-    to = bfs(from.first);
-
+    int from = bfs(0).first;
+    std::pair<int, int> to = bfs(from);
     return std::max(0, to.second - 1);
 }
 
-int readExpected(const std::string &filename) {
-    std::fstream fs("..\\samples\\" + filename + ".out");
-
-    int expected;
-    fs >> expected;
-    return expected;
+void printGraph() {
+    for (int i = 0; i < vertexCount; i++) {
+        std::cout << "Adjacency list of " << i << ": head";
+        for (int j : graph[i]) {
+            std::cout << " -> " << j;
+        }
+        std::cout << std::endl;
+    }
 }
 
 int main() {
-    std::string filename = "small_4";
-
-    createGraph(filename);
+    int expected = createGraph("big_1");
     calculateConnectedComponents();
     calculateComponentRootsByShortestPath();
     connectComponentsToBiggest();
 
+    //printGraph();
+
     int length = calculateLongestPath();
-    int expected = readExpected(filename);
     std::cout << "Done! Got: " << length << ", should be: " << expected << std::endl;
 
     return 0;
