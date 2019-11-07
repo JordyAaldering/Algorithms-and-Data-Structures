@@ -95,33 +95,24 @@ std::pair<int, int> bfs(int s, int maxDistance) {
 
     std::queue<int> queue;
     queue.push(s);
-    bool loop = true;
 
-    while (!queue.empty() && loop) {
+    while (!queue.empty()) {
         s = queue.front();
         queue.pop();
 
         for (int i : graph[s]) {
             if (distances[i] == -1) {
                 distances[i] = distances[s] + 1;
-                queue.push(i);
-
                 if (distances[i] >= maxDistance) {
-                    loop = false;
-                    break;
+                    return std::make_pair(i, distances[i]);
                 }
+
+                queue.push(i);
             }
         }
     }
 
-    std::pair<int, int> pair(0, distances[0]);
-    for (int j = 1; j < vertexCount; j++) {
-        if (distances[j] > pair.second) {
-            pair = std::make_pair(j, distances[j]);
-        }
-    }
-
-    return pair;
+    return std::make_pair(-1, -1);;
 }
 
 void calculateComponentRootsByShortestPath() {
@@ -171,7 +162,10 @@ void printGraph() {
 }
 
 int main() {
-    int expected = createGraph("small_10");
+    std::iostream::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
+    int expected = createGraph("big_8");
     calculateConnectedComponents();
     calculateComponentRootsByShortestPath();
     connectComponentsToBiggest();
