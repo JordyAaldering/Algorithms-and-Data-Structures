@@ -46,18 +46,6 @@ void readStdin() {
     }
 }
 
-int checkBaseCases() {
-    if (vertexCount <= 2) {
-        return 0;
-    }
-
-    if (edgeCount <= 1) {
-        return 1;
-    }
-
-    return -1;
-}
-
 void dfs(int i) {
     trees[componentCount].push_back(i);
     visited[i] = true;
@@ -86,7 +74,7 @@ void calculateTrees() {
     }
 }
 
-std::pair<int, int> bfs(int s, int maxDistance = -1) {
+std::pair<int, int> bfs(int s, int maxDepth = -1) {
     std::vector<int> distances(vertexCount);
     std::fill(distances.begin(), distances.end(), -1);
     distances[s] = 0;
@@ -101,7 +89,7 @@ std::pair<int, int> bfs(int s, int maxDistance = -1) {
         for (int i : graph[s]) {
             if (distances[i] == -1) {
                 distances[i] = distances[s] + 1;
-                if (maxDistance >= 0 && distances[i] >= maxDistance) {
+                if (maxDepth >= 0 && distances[i] >= maxDepth) {
                     return std::make_pair(i, distances[i]);
                 }
 
@@ -110,14 +98,15 @@ std::pair<int, int> bfs(int s, int maxDistance = -1) {
         }
     }
 
-    std::pair<int, int> pair(0, distances[0]);
+    // return the pair with the highest distance
+    int bestIndex = 0;
     for (int j = 1; j < vertexCount; j++) {
-        if (distances[j] > pair.second) {
-            pair = std::make_pair(j, distances[j]);
+        if (distances[j] > distances[bestIndex]) {
+            bestIndex = j;
         }
     }
 
-    return pair;
+    return std::make_pair(bestIndex, distances[bestIndex]);
 }
 
 /**
@@ -131,10 +120,10 @@ void calculateRoots() {
     std::fill(visited.begin(), visited.end(), false);
 
     for (int i = 0; i < componentCount; i++) {
-        int from = bfs(trees[i][0]).first;
-        std::pair<int, int> to = bfs(from);
-        int maxDistance = (int) to.second / 2;
-        roots[i] = bfs(to.first, maxDistance);
+        int fromIndex = bfs(trees[i][0]).first;
+        std::pair<int, int> to = bfs(fromIndex);
+        int maxDepth = (int) to.second / 2;
+        roots[i] = bfs(to.first, maxDepth);
     }
 }
 
@@ -165,9 +154,9 @@ void connectTrees() {
 int calculateLongestPath() {
     std::cout << __func__ << std::endl;
 
-    int from = bfs(0).first;
-    std::pair<int, int> to = bfs(from);
-    return std::max(0, to.second - 1);
+    int fromIndex = bfs(0).first;
+    int toDepth = bfs(fromIndex).second;
+    return std::max(0, toDepth - 1);
 }
 
 void printGraph() {
@@ -180,17 +169,10 @@ void printGraph() {
     }
 }
 
-int test(const std::string& filename) {
+int run(const std::string& filename) {
     std::cout << filename << std::endl;
 
     int expected = createGraph(filename);
-
-    int base = checkBaseCases();
-    if (base != -1) {
-        std::cout << "Done! Got: " << base << ", should be: " << expected << std::endl << std::endl;
-        return base;
-    }
-
     calculateTrees();
     calculateRoots();
     connectTrees();
@@ -207,10 +189,15 @@ int main() {
     std::cin.tie(nullptr);
 
     std::string small[] = {"small_1", "small_2", "small_3", "small_4", "small_5", "small_6", "small_7", "small_8", "small_9", "small_10"};
-    std::string big[] = {"big_1", /*"big_2", "big_3",*/ "big_4", "big_5", "big_6", "big_7", "big_8", "big_9", /*"big_10"*/};
+    std::string big[] = {/*"big_1", "big_2", "big_3",*/ "big_4", "big_5", "big_6", "big_7", "big_8", /*"big_9", "big_10"*/};
+
+    for (const std::string& s : small) {
+        run(s);
+        componentCount = 0;
+    }
 
     for (const std::string& s : big) {
-        test(s);
+        run(s);
         componentCount = 0;
     }
 
