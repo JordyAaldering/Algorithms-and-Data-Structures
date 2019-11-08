@@ -3,21 +3,22 @@
 #include <vector>
 #include <queue>
 
-int vertexCount = 0;
+int vertexCount;
 std::vector<int>* graph;
 std::vector<bool> visited;
 
-int componentCount = 0;
+int componentCount;
 std::vector<int>* components;
 std::vector<std::pair<int, int>> componentRoots;
 
-void addEdge(int c1, int c2) {
-    graph[c1].push_back(c2);
-    graph[c2].push_back(c1);
+void addEdge(int a, int b) {
+    graph[a].push_back(b);
+    graph[b].push_back(a);
 }
 
 int createGraph(const std::string &filename) {
     std::cout << __func__ << std::endl;
+
     std::fstream fs("..\\samples\\" + filename + ".in");
 
     int edgeCount, c1, c2;
@@ -34,6 +35,17 @@ int createGraph(const std::string &filename) {
     return expected;
 }
 
+void readStdin() {
+    int edgeCount, a, b;
+    std::cin >> vertexCount >> edgeCount;
+    graph = new std::vector<int>[vertexCount];
+
+    for (int i = 0; i < edgeCount; i++) {
+        std::cin >> a >> b;
+        addEdge(a, b);
+    }
+}
+
 void dfs(int i) {
     components[componentCount].push_back(i);
     visited[i] = true;
@@ -47,6 +59,7 @@ void dfs(int i) {
 
 void calculateConnectedComponents() {
     std::cout << __func__ << std::endl;
+
     components = new std::vector<int>[vertexCount];
     visited.resize(vertexCount);
 
@@ -58,7 +71,7 @@ void calculateConnectedComponents() {
     }
 }
 
-std::pair<int, int> bfs(int s) {
+std::pair<int, int> bfs(int s, int maxDistance = -1) {
     std::vector<int> distances(vertexCount);
     std::fill(distances.begin(), distances.end(), -1);
     distances[s] = 0;
@@ -73,6 +86,10 @@ std::pair<int, int> bfs(int s) {
         for (int i : graph[s]) {
             if (distances[i] == -1) {
                 distances[i] = distances[s] + 1;
+                if (maxDistance >= 0 && distances[i] >= maxDistance) {
+                    return std::make_pair(i, distances[i]);
+                }
+
                 queue.push(i);
             }
         }
@@ -88,35 +105,9 @@ std::pair<int, int> bfs(int s) {
     return pair;
 }
 
-std::pair<int, int> bfs(int s, int maxDistance) {
-    std::vector<int> distances(vertexCount);
-    std::fill(distances.begin(), distances.end(), -1);
-    distances[s] = 0;
-
-    std::queue<int> queue;
-    queue.push(s);
-
-    while (!queue.empty()) {
-        s = queue.front();
-        queue.pop();
-
-        for (int i : graph[s]) {
-            if (distances[i] == -1) {
-                distances[i] = distances[s] + 1;
-                if (distances[i] >= maxDistance) {
-                    return std::make_pair(i, distances[i]);
-                }
-
-                queue.push(i);
-            }
-        }
-    }
-
-    return std::make_pair(-1, -1);;
-}
-
 void calculateComponentRootsByShortestPath() {
     std::cout << __func__ << std::endl;
+
     componentRoots.resize(componentCount);
     std::fill(visited.begin(), visited.end(), false);
 
@@ -146,6 +137,7 @@ void connectComponentsToBiggest() {
 
 int calculateLongestPath() {
     std::cout << __func__ << std::endl;
+
     int from = bfs(0).first;
     std::pair<int, int> to = bfs(from);
     return std::max(0, to.second - 1);
@@ -161,11 +153,8 @@ void printGraph() {
     }
 }
 
-int main() {
-    std::iostream::sync_with_stdio(false);
-    std::cin.tie(nullptr);
-
-    int expected = createGraph("big_8");
+void test(const std::string& filename) {
+    int expected = createGraph(filename);
     calculateConnectedComponents();
     calculateComponentRootsByShortestPath();
     connectComponentsToBiggest();
@@ -173,7 +162,21 @@ int main() {
     //printGraph();
 
     int length = calculateLongestPath();
-    std::cout << "Done! Got: " << length << ", should be: " << expected << std::endl;
+    std::cout << "Done! Got: " << length << ", should be: " << expected << std::endl << std::endl;
+}
+
+int main() {
+    std::iostream::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
+    std::string small[] = {"small_1", "small_2", "small_3", "small_4", "small_5", "small_6", "small_7", "small_8", "small_9", "small_10"};
+    std::string big[] = {/*"big_1", "big_2", "big_3",*/ "big_4", "big_5", "big_6", "big_7", "big_8", /*"big_9", "big_10"*/};
+
+    for (const std::string& s : big) {
+        std::cout << s << std::endl;
+        test(s);
+        componentCount = 0;
+    }
 
     return 0;
 }
