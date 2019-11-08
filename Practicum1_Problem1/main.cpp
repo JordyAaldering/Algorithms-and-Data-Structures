@@ -17,7 +17,6 @@ void addEdge(int a, int b) {
 
 int createGraph(const std::string &filename) {
     std::fstream fs("..\\samples\\" + filename + ".in");
-
     fs >> vertexCount >> edgeCount;
     graph = new std::vector<int>[vertexCount];
 
