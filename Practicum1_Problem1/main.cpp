@@ -7,7 +7,7 @@ int vertexCount, edgeCount;
 std::vector<int>* graph;
 std::vector<bool> visited;
 
-int componentCount;
+int treeCount;
 std::vector<int>* trees;
 std::vector<std::pair<int, int>> roots;
 
@@ -47,7 +47,7 @@ void readStdin() {
 }
 
 void calculateTreesDFS(int i) {
-    trees[componentCount].push_back(i);
+    trees[treeCount].push_back(i);
     visited[i] = true;
 
     for (int j : graph[i]) {
@@ -65,11 +65,12 @@ void calculateTrees() {
 
     trees = new std::vector<int>[vertexCount];
     visited.resize(vertexCount);
+    std::fill(visited.begin(), visited.end(), false);
 
     for (int i = 0; i < vertexCount; i++) {
         if (!visited[i]) {
             calculateTreesDFS(i);
-            componentCount++;
+            treeCount++;
         }
     }
 }
@@ -81,22 +82,22 @@ std::pair<int, int> bfs(int s) {
     distances[s] = 0;
     queue.push(s);
 
+    int bestIndex = s;
+
     while (!queue.empty()) {
         s = queue.front();
         queue.pop();
 
         for (int i : graph[s]) {
             if (distances[i] == -1) {
-                distances[i] = distances[s] + 1;
+                int distance = distances[s] + 1;
+                distances[i] = distance;
                 queue.push(i);
-            }
-        }
-    }
 
-    int bestIndex = 0;
-    for (int j = 1; j < vertexCount; j++) {
-        if (distances[j] > distances[bestIndex]) {
-            bestIndex = j;
+                if (distance > distances[bestIndex]) {
+                    bestIndex = i;
+                }
+            }
         }
     }
 
@@ -105,11 +106,13 @@ std::pair<int, int> bfs(int s) {
 
 std::pair<std::pair<int, int>, std::vector<int>> bfsCached(int s) {
     std::vector<int> distances(vertexCount, -1);
-    std::vector<int> pred(vertexCount);
+    std::vector<int> pred(vertexCount, -1);
 
     std::queue<int> queue;
     distances[s] = 0;
     queue.push(s);
+
+    int bestIndex = s;
 
     while (!queue.empty()) {
         s = queue.front();
@@ -117,17 +120,15 @@ std::pair<std::pair<int, int>, std::vector<int>> bfsCached(int s) {
 
         for (int i : graph[s]) {
             if (distances[i] == -1) {
-                distances[i] = distances[s] + 1;
+                int distance = distances[s] + 1;
+                distances[i] = distance;
                 pred[i] = s;
                 queue.push(i);
-            }
-        }
-    }
 
-    int bestIndex = 0;
-    for (int j = 1; j < vertexCount; j++) {
-        if (distances[j] > distances[bestIndex]) {
-            bestIndex = j;
+                if (distance > distances[bestIndex]) {
+                    bestIndex = i;
+                }
+            }
         }
     }
 
@@ -141,18 +142,17 @@ std::pair<std::pair<int, int>, std::vector<int>> bfsCached(int s) {
 void calculateRoots() {
     std::cout << __func__ << std::endl;
 
-    roots.resize(componentCount);
+    roots.resize(treeCount);
 
-    for (int i = 0; i < componentCount; i++) {
+    for (int i = 0; i < treeCount; i++) {
         std::pair<int, int> t1 = bfs(trees[i][0]);
         auto res = bfsCached(t1.first);
         std::pair<int, int> t2 = res.first;
 
         int root = t2.first;
         int maxDepth = (int) t2.second / 2;
-
-        for (int t = t2.first, depth = 0; t != t1.first && depth <= maxDepth; t = res.second[t], depth++) {
-            root = t;
+        for (int depth = 1; depth <= maxDepth; depth++) {
+            root = res.second[root];
         }
 
         roots[i] = std::make_pair(root, maxDepth);
@@ -167,13 +167,13 @@ void connectTrees() {
     std::cout << __func__ << std::endl;
 
     int bestIndex = 0;
-    for (int i = 1; i < componentCount; i++) {
+    for (int i = 1; i < treeCount; i++) {
         if (roots[i].second > roots[bestIndex].second) {
             bestIndex = i;
         }
     }
 
-    for (int i = 0; i < componentCount; i++) {
+    for (int i = 0; i < treeCount; i++) {
         if (i != bestIndex) {
             addEdge(roots[i].first, roots[bestIndex].first);
         }
@@ -195,6 +195,16 @@ int run(const std::string& filename) {
     std::cout << filename << std::endl;
 
     int expected = createGraph(filename);
+
+    if (vertexCount <= 2) {
+        std::cout << "Done! Got: 0, should be: " << expected << std::endl << std::endl;
+        return 0;
+    }
+    else if (edgeCount <= 1) {
+        std::cout << "Done! Got: 1, should be: " << expected << std::endl << std::endl;
+        return 1;
+    }
+
     calculateTrees();
     calculateRoots();
     connectTrees();
@@ -209,16 +219,11 @@ int main() {
     std::cin.tie(nullptr);
 
     std::string small[] = {"small_1", "small_2", "small_3", "small_4", "small_5", "small_6", "small_7", "small_8", "small_9", "small_10"};
-    std::string big[] = {/*"big_1", "big_2", "big_3",*/ "big_4", "big_5", "big_6", "big_7", "big_8", "big_9", /*"big_10"*/};
-
-    for (const std::string& s : small) {
-        run(s);
-        componentCount = 0;
-    }
+    std::string big[] = {"big_1", "big_2", /*"big_3",*/ "big_4", "big_5", "big_6", "big_7", "big_8", "big_9", "big_10"};
 
     for (const std::string& s : big) {
         run(s);
-        componentCount = 0;
+        treeCount = 0;
     }
 
     return 0;
