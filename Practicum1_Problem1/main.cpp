@@ -3,7 +3,7 @@
 #include <vector>
 #include <queue>
 
-int vertexCount;
+int vertexCount, edgeCount;
 std::vector<int>* graph;
 std::vector<bool> visited;
 
@@ -21,12 +21,12 @@ int createGraph(const std::string &filename) {
 
     std::fstream fs("..\\samples\\" + filename + ".in");
 
-    int edgeCount, c1, c2;
     fs >> vertexCount >> edgeCount;
     graph = new std::vector<int>[vertexCount];
 
-    while (fs >> c1 >> c2) {
-        addEdge(c1, c2);
+    int a, b;
+    while (fs >> a >> b) {
+        addEdge(a, b);
     }
 
     fs = std::fstream("..\\samples\\" + filename + ".out");
@@ -36,14 +36,26 @@ int createGraph(const std::string &filename) {
 }
 
 void readStdin() {
-    int edgeCount, a, b;
     std::cin >> vertexCount >> edgeCount;
     graph = new std::vector<int>[vertexCount];
 
+    int a, b;
     for (int i = 0; i < edgeCount; i++) {
         std::cin >> a >> b;
         addEdge(a, b);
     }
+}
+
+int checkBaseCases() {
+    if (vertexCount <= 2) {
+        return 0;
+    }
+
+    if (edgeCount <= 1) {
+        return 1;
+    }
+
+    return -1;
 }
 
 void dfs(int i) {
@@ -168,10 +180,17 @@ void printGraph() {
     }
 }
 
-void test(const std::string& filename) {
+int test(const std::string& filename) {
     std::cout << filename << std::endl;
 
     int expected = createGraph(filename);
+
+    int base = checkBaseCases();
+    if (base != -1) {
+        std::cout << "Done! Got: " << base << ", should be: " << expected << std::endl << std::endl;
+        return base;
+    }
+
     calculateTrees();
     calculateRoots();
     connectTrees();
@@ -180,6 +199,7 @@ void test(const std::string& filename) {
 
     int length = calculateLongestPath();
     std::cout << "Done! Got: " << length << ", should be: " << expected << std::endl << std::endl;
+    return length;
 }
 
 int main() {
@@ -187,7 +207,7 @@ int main() {
     std::cin.tie(nullptr);
 
     std::string small[] = {"small_1", "small_2", "small_3", "small_4", "small_5", "small_6", "small_7", "small_8", "small_9", "small_10"};
-    std::string big[] = {/*"big_1", "big_2", "big_3",*/ "big_4", "big_5", "big_6", "big_7", "big_8", /*"big_9", "big_10"*/};
+    std::string big[] = {"big_1", /*"big_2", "big_3",*/ "big_4", "big_5", "big_6", "big_7", "big_8", "big_9", /*"big_10"*/};
 
     for (const std::string& s : big) {
         test(s);
