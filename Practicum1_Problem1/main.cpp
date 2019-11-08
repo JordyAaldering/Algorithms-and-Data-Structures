@@ -54,9 +54,6 @@ void dfs(int i, std::vector<bool>& visited) {
     }
 }
 
-/**
- * Finds separate trees by applying DFS.
- */
 void calculateTrees() {
     trees = new std::vector<int>[vertexCount];
     std::vector<bool> visited(vertexCount);
