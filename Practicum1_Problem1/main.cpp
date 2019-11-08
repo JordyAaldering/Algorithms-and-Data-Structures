@@ -134,16 +134,16 @@ void calculateRoots() {
 void connectTrees() {
     std::cout << __func__ << std::endl;
 
-    int bestComponent = 0;
+    int bestIndex = 0;
     for (int i = 1; i < componentCount; i++) {
-        if (roots[i].second > roots[bestComponent].second) {
-            bestComponent = i;
+        if (roots[i].second > roots[bestIndex].second) {
+            bestIndex = i;
         }
     }
 
     for (int i = 0; i < componentCount; i++) {
-        if (i != bestComponent) {
-            addEdge(roots[i].first, roots[bestComponent].first);
+        if (i != bestIndex) {
+            addEdge(roots[i].first, roots[bestIndex].first);
         }
     }
 }
