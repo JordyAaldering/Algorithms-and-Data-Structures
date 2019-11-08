@@ -8,8 +8,8 @@ std::vector<int>* graph;
 std::vector<bool> visited;
 
 int componentCount;
-std::vector<int>* components;
-std::vector<std::pair<int, int>> componentRoots;
+std::vector<int>* trees;
+std::vector<std::pair<int, int>> roots;
 
 void addEdge(int a, int b) {
     graph[a].push_back(b);
@@ -47,7 +47,7 @@ void readStdin() {
 }
 
 void dfs(int i) {
-    components[componentCount].push_back(i);
+    trees[componentCount].push_back(i);
     visited[i] = true;
 
     for (int j : graph[i]) {
@@ -57,10 +57,13 @@ void dfs(int i) {
     }
 }
 
-void calculateConnectedComponents() {
+/**
+ * Finds separate trees by applying DFS.
+ */
+void calculateTrees() {
     std::cout << __func__ << std::endl;
 
-    components = new std::vector<int>[vertexCount];
+    trees = new std::vector<int>[vertexCount];
     visited.resize(vertexCount);
 
     for (int i = 0; i < vertexCount; i++) {
@@ -105,36 +108,47 @@ std::pair<int, int> bfs(int s, int maxDistance = -1) {
     return pair;
 }
 
-void calculateComponentRootsByShortestPath() {
+/**
+ * Calculates the roots of each tree by finding the node
+ * with the shortest distance to all other nodes.
+ */
+void calculateRoots() {
     std::cout << __func__ << std::endl;
 
-    componentRoots.resize(componentCount);
+    roots.resize(componentCount);
     std::fill(visited.begin(), visited.end(), false);
 
     for (int i = 0; i < componentCount; i++) {
-        std::pair<int, int> from = bfs(components[i][0]);
+        std::pair<int, int> from = bfs(trees[i][0]);
         int distance = (int) from.second / 2;
-        componentRoots[i] = bfs(from.first, distance);
+        roots[i] = bfs(from.first, distance);
     }
 }
 
-void connectComponentsToBiggest() {
+/**
+ * Connects all trees by adding an edge from every
+ * root to the root with the biggest depth.
+ */
+void connectTrees() {
     std::cout << __func__ << std::endl;
 
     int bestComponent = 0;
     for (int i = 1; i < componentCount; i++) {
-        if (componentRoots[i].second > componentRoots[bestComponent].second) {
+        if (roots[i].second > roots[bestComponent].second) {
             bestComponent = i;
         }
     }
 
     for (int i = 0; i < componentCount; i++) {
         if (i != bestComponent) {
-            addEdge(componentRoots[i].first, componentRoots[bestComponent].first);
+            addEdge(roots[i].first, roots[bestComponent].first);
         }
     }
 }
 
+/**
+ * Calculates the longest simple path by applying BFS.
+ */
 int calculateLongestPath() {
     std::cout << __func__ << std::endl;
 
@@ -155,9 +169,9 @@ void printGraph() {
 
 void test(const std::string& filename) {
     int expected = createGraph(filename);
-    calculateConnectedComponents();
-    calculateComponentRootsByShortestPath();
-    connectComponentsToBiggest();
+    calculateTrees();
+    calculateRoots();
+    connectTrees();
 
     //printGraph();
 
