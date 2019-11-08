@@ -74,14 +74,12 @@ void calculateTrees() {
     }
 }
 
-std::pair<int, int> bfs(int s, std::vector<int>& path) {
-    std::vector<int> distances(vertexCount);
-    std::fill(distances.begin(), distances.end(), -1);
-    distances[s] = 0;
+std::pair<int, int> bfs(int s) {
+    std::vector<int> distances(vertexCount, -1);
 
     std::queue<int> queue;
+    distances[s] = 0;
     queue.push(s);
-    path.push_back(s);
 
     while (!queue.empty()) {
         s = queue.front();
@@ -95,7 +93,6 @@ std::pair<int, int> bfs(int s, std::vector<int>& path) {
         }
     }
 
-    // return the pair with the highest distance
     int bestIndex = 0;
     for (int j = 1; j < vertexCount; j++) {
         if (distances[j] > distances[bestIndex]) {
@@ -104,6 +101,37 @@ std::pair<int, int> bfs(int s, std::vector<int>& path) {
     }
 
     return std::make_pair(bestIndex, distances[bestIndex]);
+}
+
+std::pair<std::pair<int, int>, std::vector<int>> bfsCached(int s) {
+    std::vector<int> distances(vertexCount, -1);
+    std::vector<int> pred(vertexCount);
+
+    std::queue<int> queue;
+    distances[s] = 0;
+    queue.push(s);
+
+    while (!queue.empty()) {
+        s = queue.front();
+        queue.pop();
+
+        for (int i : graph[s]) {
+            if (distances[i] == -1) {
+                distances[i] = distances[s] + 1;
+                pred[i] = s;
+                queue.push(i);
+            }
+        }
+    }
+
+    int bestIndex = 0;
+    for (int j = 1; j < vertexCount; j++) {
+        if (distances[j] > distances[bestIndex]) {
+            bestIndex = j;
+        }
+    }
+
+    return std::make_pair(std::make_pair(bestIndex, distances[bestIndex]), pred);
 }
 
 /**
@@ -116,11 +144,18 @@ void calculateRoots() {
     roots.resize(componentCount);
 
     for (int i = 0; i < componentCount; i++) {
-        int fromIndex = bfs(trees[i][0]).first;
-        std::pair<int, int> to = bfs(fromIndex);
+        std::pair<int, int> t1 = bfs(trees[i][0]);
+        auto res = bfsCached(t1.first);
+        std::pair<int, int> t2 = res.first;
 
-        int maxDepth = (int) to.second / 2;
-        //roots[i] = ;
+        int root = t2.first;
+        int maxDepth = (int) t2.second / 2;
+
+        for (int t = t2.first, depth = 0; t != t1.first && depth <= maxDepth; t = res.second[t], depth++) {
+            root = t;
+        }
+
+        roots[i] = std::make_pair(root, maxDepth);
     }
 }
 
