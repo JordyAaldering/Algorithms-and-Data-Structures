@@ -119,9 +119,10 @@ void calculateRoots() {
     std::fill(visited.begin(), visited.end(), false);
 
     for (int i = 0; i < componentCount; i++) {
-        std::pair<int, int> from = bfs(trees[i][0]);
-        int distance = (int) from.second / 2;
-        roots[i] = bfs(from.first, distance);
+        int from = bfs(trees[i][0]).first;
+        std::pair<int, int> to = bfs(from);
+        int maxDistance = (int) to.second / 2;
+        roots[i] = bfs(to.first, maxDistance);
     }
 }
 
@@ -147,7 +148,7 @@ void connectTrees() {
 }
 
 /**
- * Calculates the longest simple path by applying BFS.
+ * Calculates the longest simple path by applying BFS twice.
  */
 int calculateLongestPath() {
     std::cout << __func__ << std::endl;
@@ -168,6 +169,8 @@ void printGraph() {
 }
 
 void test(const std::string& filename) {
+    std::cout << filename << std::endl;
+
     int expected = createGraph(filename);
     calculateTrees();
     calculateRoots();
@@ -187,7 +190,6 @@ int main() {
     std::string big[] = {/*"big_1", "big_2", "big_3",*/ "big_4", "big_5", "big_6", "big_7", "big_8", /*"big_9", "big_10"*/};
 
     for (const std::string& s : big) {
-        std::cout << s << std::endl;
         test(s);
         componentCount = 0;
     }
