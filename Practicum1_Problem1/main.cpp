@@ -126,8 +126,9 @@ std::pair<std::pair<int, int>, std::vector<int>> bfsCached(int s) {
     return std::make_pair(std::make_pair(bestIndex, distances[bestIndex]), pred);
 }
 
-void calculateRoots() {
+int calculateRoots() {
     roots.resize(treeCount);
+    int bestIndex = 0;
 
     for (int i = 0; i < treeCount; i++) {
         std::pair<int, int> t1 = bfs(trees[i][0]);
@@ -141,17 +142,15 @@ void calculateRoots() {
         }
 
         roots[i] = std::make_pair(root, maxDepth);
-    }
-}
-
-void connectTrees() {
-    int bestIndex = 0;
-    for (int i = 1; i < treeCount; i++) {
         if (roots[i].second > roots[bestIndex].second) {
             bestIndex = i;
         }
     }
 
+    return bestIndex;
+}
+
+void connectTrees(int bestIndex) {
     for (int i = 0; i < treeCount; i++) {
         if (i != bestIndex) {
             addEdge(roots[i].first, roots[bestIndex].first);
@@ -169,6 +168,7 @@ int main() {
     std::iostream::sync_with_stdio(false);
     std::cin.tie(nullptr);
 
+    //std::cout << createGraph("big_9") << " ";
     readStdin();
     int length;
 
@@ -180,8 +180,8 @@ int main() {
     }
     else {
         calculateTrees();
-        calculateRoots();
-        connectTrees();
+        int bestIndex = calculateRoots();
+        connectTrees(bestIndex);
         length = calculateLongestPath();
     }
 
