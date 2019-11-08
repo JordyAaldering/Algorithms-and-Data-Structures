@@ -46,13 +46,13 @@ void readStdin() {
     }
 }
 
-void dfs(int i) {
+void calculateTreesDFS(int i) {
     trees[componentCount].push_back(i);
     visited[i] = true;
 
     for (int j : graph[i]) {
         if (!visited[j]) {
-            dfs(j);
+            calculateTreesDFS(j);
         }
     }
 }
@@ -68,19 +68,20 @@ void calculateTrees() {
 
     for (int i = 0; i < vertexCount; i++) {
         if (!visited[i]) {
-            dfs(i);
+            calculateTreesDFS(i);
             componentCount++;
         }
     }
 }
 
-std::pair<int, int> bfs(int s, int maxDepth = -1) {
+std::pair<int, int> bfs(int s, std::vector<int>& path) {
     std::vector<int> distances(vertexCount);
     std::fill(distances.begin(), distances.end(), -1);
     distances[s] = 0;
 
     std::queue<int> queue;
     queue.push(s);
+    path.push_back(s);
 
     while (!queue.empty()) {
         s = queue.front();
@@ -89,10 +90,6 @@ std::pair<int, int> bfs(int s, int maxDepth = -1) {
         for (int i : graph[s]) {
             if (distances[i] == -1) {
                 distances[i] = distances[s] + 1;
-                if (maxDepth >= 0 && distances[i] >= maxDepth) {
-                    return std::make_pair(i, distances[i]);
-                }
-
                 queue.push(i);
             }
         }
@@ -117,13 +114,13 @@ void calculateRoots() {
     std::cout << __func__ << std::endl;
 
     roots.resize(componentCount);
-    std::fill(visited.begin(), visited.end(), false);
 
     for (int i = 0; i < componentCount; i++) {
         int fromIndex = bfs(trees[i][0]).first;
         std::pair<int, int> to = bfs(fromIndex);
+
         int maxDepth = (int) to.second / 2;
-        roots[i] = bfs(to.first, maxDepth);
+        //roots[i] = ;
     }
 }
 
@@ -159,16 +156,6 @@ int calculateLongestPath() {
     return std::max(0, toDepth - 1);
 }
 
-void printGraph() {
-    for (int i = 0; i < vertexCount; i++) {
-        std::cout << "Adjacency list of " << i << ": head";
-        for (int j : graph[i]) {
-            std::cout << " -> " << j;
-        }
-        std::cout << std::endl;
-    }
-}
-
 int run(const std::string& filename) {
     std::cout << filename << std::endl;
 
@@ -176,8 +163,6 @@ int run(const std::string& filename) {
     calculateTrees();
     calculateRoots();
     connectTrees();
-
-    //printGraph();
 
     int length = calculateLongestPath();
     std::cout << "Done! Got: " << length << ", should be: " << expected << std::endl << std::endl;
@@ -189,7 +174,7 @@ int main() {
     std::cin.tie(nullptr);
 
     std::string small[] = {"small_1", "small_2", "small_3", "small_4", "small_5", "small_6", "small_7", "small_8", "small_9", "small_10"};
-    std::string big[] = {/*"big_1", "big_2", "big_3",*/ "big_4", "big_5", "big_6", "big_7", "big_8", /*"big_9", "big_10"*/};
+    std::string big[] = {/*"big_1", "big_2", "big_3",*/ "big_4", "big_5", "big_6", "big_7", "big_8", "big_9", /*"big_10"*/};
 
     for (const std::string& s : small) {
         run(s);
