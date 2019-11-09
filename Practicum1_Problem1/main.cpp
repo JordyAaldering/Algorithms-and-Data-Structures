@@ -1,5 +1,5 @@
 #include <iostream>
-#include <fstream>
+//#include <fstream>
 #include <utility>
 #include <vector>
 #include <queue>
@@ -19,7 +19,7 @@ void addEdge(int a, int b) {
     graph[b].push_back(a);
 }
 
-int createGraph(const std::string &filename) {
+/*int createGraph(const std::string &filename) {
     std::fstream fs("..\\samples\\" + filename + ".in");
     fs >> vertexCount >> edgeCount;
     graph = new vector<int>[vertexCount];
@@ -33,7 +33,7 @@ int createGraph(const std::string &filename) {
     int expected;
     fs >> expected;
     return expected;
-}
+}*/
 
 void readStdin() {
     cin >> vertexCount >> edgeCount;
@@ -84,16 +84,18 @@ pair<int, int> calculateRoots() {
 
     for (int i = 0; i < vertexCount; i++) {
         if (!visited[i] && !graph[i].empty()) {
+            // calculate the end-points
             pair<pair<int, int>, vector<int>> t1 = bfs(graph[i][0]);
             pair<pair<int, int>, vector<int>> t2 = bfs(t1.first.first);
 
+            // find the root
             int root = t2.first.first;
             int maxDepth = (int) t2.first.second / 2;
-
             for (int depth = 1; depth <= maxDepth; depth++) {
                 root = t2.second[root];
             }
 
+            // add the root to the list
             pair<int, int> p = make_pair(root, maxDepth);
             roots.push_back(p);
             if (p.second > bestRoot.second) {
@@ -123,23 +125,21 @@ int main() {
     std::iostream::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    cout << createGraph("big_2") << " ";
-    //readStdin();
-    int length;
+    //cout << createGraph("big_10") << " ";
+    readStdin();
 
     if (vertexCount <= 2) {
-        length = 0;
+        cout << 0;
     }
     else if (edgeCount <= 1) {
-        length = 1;
+        cout << 1;
     }
     else {
         visited.resize(vertexCount);
         pair<int, int> bestRoot = calculateRoots();
         connectTrees(bestRoot);
-        length = calculateLongestPath();
+        cout << calculateLongestPath();
     }
 
-    cout << length;
     return 0;
 }
