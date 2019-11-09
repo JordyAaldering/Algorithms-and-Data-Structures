@@ -84,18 +84,15 @@ pair<int, int> calculateRoots() {
 
     for (int i = 0; i < vertexCount; i++) {
         if (!visited[i] && !graph[i].empty()) {
-            // calculate the end-points
             pair<pair<int, int>, vector<int>> t1 = bfs(graph[i][0]);
             pair<pair<int, int>, vector<int>> t2 = bfs(t1.first.first);
 
-            // find the root
             int root = t2.first.first;
             int maxDepth = (int) t2.first.second / 2;
             for (int depth = 1; depth <= maxDepth; depth++) {
                 root = t2.second[root];
             }
 
-            // add the root to the list
             pair<int, int> p = make_pair(root, maxDepth);
             roots.push_back(p);
             if (p.second > bestRoot.second) {
