@@ -1,14 +1,18 @@
 #include <iostream>
 #include <fstream>
+#include <utility>
 #include <vector>
 #include <queue>
 
-int vertexCount, edgeCount;
-std::vector<int>* graph;
+using std::vector;
+using std::queue;
+using std::pair, std::make_pair;
+using std::cin, std::cout;
 
-int treeCount;
-std::vector<int>* trees;
-std::vector<std::pair<int, int>> roots;
+int vertexCount, edgeCount;
+vector<int>* graph;
+vector<bool> visited;
+vector<pair<int, int>> roots;
 
 void addEdge(int a, int b) {
     graph[a].push_back(b);
@@ -18,7 +22,7 @@ void addEdge(int a, int b) {
 int createGraph(const std::string &filename) {
     std::fstream fs("..\\samples\\" + filename + ".in");
     fs >> vertexCount >> edgeCount;
-    graph = new std::vector<int>[vertexCount];
+    graph = new vector<int>[vertexCount];
 
     int a, b;
     while (fs >> a >> b) {
@@ -32,143 +36,95 @@ int createGraph(const std::string &filename) {
 }
 
 void readStdin() {
-    std::cin >> vertexCount >> edgeCount;
-    graph = new std::vector<int>[vertexCount];
+    cin >> vertexCount >> edgeCount;
+    graph = new vector<int>[vertexCount];
 
     int a, b;
     for (int i = 0; i < edgeCount; i++) {
-        std::cin >> a >> b;
+        cin >> a >> b;
         addEdge(a, b);
     }
 }
 
-void dfs(int i, std::vector<bool>& visited) {
-    trees[treeCount].push_back(i);
-    visited[i] = true;
+pair<pair<int, int>, vector<int>> bfs(int s) {
+    vector<int> distances(vertexCount, -1);
+    distances[s] = 0;
 
-    for (int j : graph[i]) {
-        if (!visited[j]) {
-            dfs(j, visited);
+    queue<int> queue;
+    queue.push(s);
+
+    vector<int> pred(vertexCount, -1);
+    pair<int, int> bestRoot(s, 0);
+
+    while (!queue.empty()) {
+        s = queue.front();
+        queue.pop();
+
+        for (int i : graph[s]) {
+            if (distances[i] == -1) {
+                int dist = distances[s] + 1;
+                distances[i] = dist;
+                if (dist > bestRoot.second) {
+                    bestRoot = make_pair(i, dist);
+                }
+
+                queue.push(i);
+                pred[i] = s;
+            }
+
+            visited[i] = true;
         }
     }
+
+    return make_pair(bestRoot, pred);
 }
 
-void calculateTrees() {
-    trees = new std::vector<int>[vertexCount];
-    std::vector<bool> visited(vertexCount);
+pair<int, int> calculateRoots() {
+    pair<int, int> bestRoot(0, 0);
 
     for (int i = 0; i < vertexCount; i++) {
-        if (!visited[i]) {
-            dfs(i, visited);
-            treeCount++;
-        }
-    }
-}
+        if (!visited[i] && !graph[i].empty()) {
+            pair<pair<int, int>, vector<int>> t1 = bfs(graph[i][0]);
+            pair<pair<int, int>, vector<int>> t2 = bfs(t1.first.first);
 
-std::pair<int, int> bfs(int s) {
-    std::vector<int> distances(vertexCount, -1);
+            int root = t2.first.first;
+            int maxDepth = (int) t2.first.second / 2;
 
-    std::queue<int> queue;
-    distances[s] = 0;
-    queue.push(s);
+            for (int depth = 1; depth <= maxDepth; depth++) {
+                root = t2.second[root];
+            }
 
-    int bestIndex = s;
-
-    while (!queue.empty()) {
-        s = queue.front();
-        queue.pop();
-
-        for (int i : graph[s]) {
-            if (distances[i] == -1) {
-                int distance = distances[s] + 1;
-                distances[i] = distance;
-                queue.push(i);
-
-                if (distance > distances[bestIndex]) {
-                    bestIndex = i;
-                }
+            pair<int, int> p = make_pair(root, maxDepth);
+            roots.push_back(p);
+            if (p.second > bestRoot.second) {
+                bestRoot = p;
             }
         }
     }
 
-    return std::make_pair(bestIndex, distances[bestIndex]);
+    return bestRoot;
 }
 
-std::pair<std::pair<int, int>, std::vector<int>> bfsCached(int s) {
-    std::vector<int> distances(vertexCount, -1);
-    std::vector<int> pred(vertexCount, -1);
-
-    std::queue<int> queue;
-    distances[s] = 0;
-    queue.push(s);
-
-    int bestIndex = s;
-
-    while (!queue.empty()) {
-        s = queue.front();
-        queue.pop();
-
-        for (int i : graph[s]) {
-            if (distances[i] == -1) {
-                int distance = distances[s] + 1;
-                distances[i] = distance;
-                pred[i] = s;
-                queue.push(i);
-
-                if (distance > distances[bestIndex]) {
-                    bestIndex = i;
-                }
-            }
-        }
-    }
-
-    return std::make_pair(std::make_pair(bestIndex, distances[bestIndex]), pred);
-}
-
-int calculateRoots() {
-    roots.resize(treeCount);
-    int bestIndex = 0;
-
-    for (int i = 0; i < treeCount; i++) {
-        std::pair<int, int> t1 = bfs(trees[i][0]);
-        auto res = bfsCached(t1.first);
-        std::pair<int, int> t2 = res.first;
-
-        int root = t2.first;
-        int maxDepth = (int) t2.second / 2;
-        for (int depth = 1; depth <= maxDepth; depth++) {
-            root = res.second[root];
-        }
-
-        roots[i] = std::make_pair(root, maxDepth);
-        if (roots[i].second > roots[bestIndex].second) {
-            bestIndex = i;
-        }
-    }
-
-    return bestIndex;
-}
-
-void connectTrees(int bestIndex) {
-    for (int i = 0; i < treeCount; i++) {
-        if (i != bestIndex) {
-            addEdge(roots[i].first, roots[bestIndex].first);
+void connectTrees(pair<int, int> bestRoot) {
+    for (pair<int, int> root : roots) {
+        if (root.first != bestRoot.first) {
+            addEdge(root.first, bestRoot.first);
         }
     }
 }
 
 int calculateLongestPath() {
-    int fromIndex = bfs(0).first;
-    int toDepth = bfs(fromIndex).second;
+    int fromIndex = bfs(0).first.first;
+    int toDepth = bfs(fromIndex).first.second;
     return std::max(0, toDepth - 1);
 }
 
 int main() {
     std::iostream::sync_with_stdio(false);
-    std::cin.tie(nullptr);
+    cin.tie(nullptr);
 
-    //std::cout << createGraph("big_9") << " ";
-    readStdin();
+    cout << createGraph("big_2") << " ";
+    //readStdin();
     int length;
 
     if (vertexCount <= 2) {
@@ -178,12 +134,12 @@ int main() {
         length = 1;
     }
     else {
-        calculateTrees();
-        int bestIndex = calculateRoots();
-        connectTrees(bestIndex);
+        visited.resize(vertexCount);
+        pair<int, int> bestRoot = calculateRoots();
+        connectTrees(bestRoot);
         length = calculateLongestPath();
     }
 
-    std::cout << length;
+    cout << length;
     return 0;
 }
