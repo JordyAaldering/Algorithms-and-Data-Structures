@@ -1,13 +1,12 @@
 #include <iostream>
-//#include <fstream>
+#include <fstream>
 #include <utility>
 #include <vector>
 #include <queue>
 
 using std::vector;
 using std::queue;
-using std::pair, std::make_pair;
-using std::cin, std::cout;
+using std::pair;
 
 int vertexCount, edgeCount;
 vector<int>* graph;
@@ -19,7 +18,11 @@ void addEdge(int a, int b) {
     graph[b].push_back(a);
 }
 
-/*int createGraph(const std::string &filename) {
+static pair<int, int> max(pair<int, int> a, pair<int, int> b) {
+    return a.second > b.second ? a : b;
+}
+
+int createGraph(const std::string &filename) {
     std::fstream fs("..\\samples\\" + filename + ".in");
     fs >> vertexCount >> edgeCount;
     graph = new vector<int>[vertexCount];
@@ -33,70 +36,39 @@ void addEdge(int a, int b) {
     int expected;
     fs >> expected;
     return expected;
-}*/
+}
 
-void readStdin() {
-    cin >> vertexCount >> edgeCount;
-    graph = new vector<int>[vertexCount];
-
+void createGraph() {
     int a, b;
     for (int i = 0; i < edgeCount; i++) {
-        cin >> a >> b;
+        std::cin >> a >> b;
         addEdge(a, b);
     }
 }
 
-pair<pair<int, int>, vector<int>> bfs(int s) {
+pair<int, int> bfs(int s) {
     vector<int> distances(vertexCount, -1);
     distances[s] = 0;
 
     queue<int> queue;
     queue.push(s);
 
-    vector<int> pred(vertexCount, -1);
     pair<int, int> bestRoot(s, 0);
 
     while (!queue.empty()) {
         s = queue.front();
         queue.pop();
+        visited[s] = true;
 
         for (int i : graph[s]) {
-            if (distances[i] == -1) {
-                int dist = distances[s] + 1;
-                distances[i] = dist;
-                if (dist > bestRoot.second) {
-                    bestRoot = make_pair(i, dist);
-                }
-
-                queue.push(i);
-                pred[i] = s;
-            }
-
             visited[i] = true;
-        }
-    }
 
-    return make_pair(bestRoot, pred);
-}
+            if (distances[i] == -1) {
+                pair<int, int> root(i, distances[s] + 1);
+                distances[i] = root.second;
+                queue.push(i);
 
-pair<int, int> calculateRoots() {
-    pair<int, int> bestRoot(0, 0);
-
-    for (int i = 0; i < vertexCount; i++) {
-        if (!visited[i] && !graph[i].empty()) {
-            pair<pair<int, int>, vector<int>> t1 = bfs(graph[i][0]);
-            pair<pair<int, int>, vector<int>> t2 = bfs(t1.first.first);
-
-            int root = t2.first.first;
-            int maxDepth = (int) t2.first.second / 2;
-            for (int depth = 1; depth <= maxDepth; depth++) {
-                root = t2.second[root];
-            }
-
-            pair<int, int> p = make_pair(root, maxDepth);
-            roots.push_back(p);
-            if (p.second > bestRoot.second) {
-                bestRoot = p;
+                bestRoot = max(bestRoot, root);
             }
         }
     }
@@ -104,38 +76,95 @@ pair<int, int> calculateRoots() {
     return bestRoot;
 }
 
-void connectTrees(pair<int, int> bestRoot) {
+pair<pair<int, int>, vector<int>> bfsCached(int s) {
+    vector<int> distances(vertexCount, -1);
+    distances[s] = 0;
+
+    queue<int> queue;
+    queue.push(s);
+
+    vector<int> pred(vertexCount);
+    pair<int, int> bestRoot(s, 0);
+
+    while (!queue.empty()) {
+        s = queue.front();
+        queue.pop();
+        visited[s] = true;
+
+        for (int i : graph[s]) {
+            visited[i] = true;
+
+            if (distances[i] == -1) {
+                pair<int, int> root(i, distances[s] + 1);
+                distances[i] = root.second;
+                pred[i] = s;
+                queue.push(i);
+
+                bestRoot = max(bestRoot, root);
+            }
+        }
+    }
+
+    return std::make_pair(bestRoot, pred);
+}
+
+int calculateRoots() {
+    pair<int, int> bestRoot(0, 0);
+
+    for (int i = 0; i < vertexCount; i++) {
+        if (!visited[i] && !graph[i].empty()) {
+            auto t1 = bfs(graph[i][0]);
+            auto res = bfsCached(t1.first);
+            auto t2 = res.first;
+
+            pair<int, int> root(t2.first, (int) t2.second / 2);
+            for (int depth = 1; depth <= root.second; depth++) {
+                root.first = res.second[root.first];
+            }
+
+            roots.push_back(root);
+            bestRoot = max(bestRoot, root);
+        }
+    }
+
+    return bestRoot.first;
+}
+
+void connectTrees(int bestRootIndex) {
     for (pair<int, int> root : roots) {
-        if (root.first != bestRoot.first) {
-            addEdge(root.first, bestRoot.first);
+        if (root.first != bestRootIndex) {
+            addEdge(root.first, bestRootIndex);
         }
     }
 }
 
-int calculateLongestPath() {
-    int fromIndex = bfs(0).first.first;
-    int toDepth = bfs(fromIndex).first.second;
-    return std::max(0, toDepth - 1);
+int calculateLongestPath(int bestRootIndex) {
+    pair<int, int> t1 = bfs(bestRootIndex);
+    pair<int, int> t2 = bfs(t1.first);
+    return std::max(0, t2.second - 1);
 }
 
 int main() {
     std::iostream::sync_with_stdio(false);
-    cin.tie(nullptr);
+    std::cin.tie(nullptr);
 
-    //cout << createGraph("big_10") << " ";
-    readStdin();
+    //std::cin >> vertexCount >> edgeCount;
+    std::cout << createGraph("big_2") << " ";
 
     if (vertexCount <= 2) {
-        cout << 0;
+        std::cout << "0";
     }
     else if (edgeCount <= 1) {
-        cout << 1;
+        std::cout << "1";
     }
     else {
+        //graph = new vector<int>[vertexCount];
         visited.resize(vertexCount);
-        pair<int, int> bestRoot = calculateRoots();
-        connectTrees(bestRoot);
-        cout << calculateLongestPath();
+
+        //createGraph();
+        int bestRootIndex = calculateRoots();
+        connectTrees(bestRootIndex);
+        std::cout << calculateLongestPath(bestRootIndex);
     }
 
     return 0;
