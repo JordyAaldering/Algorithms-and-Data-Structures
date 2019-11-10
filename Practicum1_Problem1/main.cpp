@@ -3,6 +3,7 @@
 #include <utility>
 #include <vector>
 #include <queue>
+#include <cmath>
 
 using std::vector;
 using std::queue;
@@ -61,8 +62,6 @@ pair<int, int> bfs(int s) {
         visited[s] = true;
 
         for (int i : graph[s]) {
-            visited[i] = true;
-
             if (distances[i] == -1) {
                 pair<int, int> root(i, distances[s] + 1);
                 distances[i] = root.second;
@@ -92,8 +91,6 @@ pair<pair<int, int>, vector<int>> bfsCached(int s) {
         visited[s] = true;
 
         for (int i : graph[s]) {
-            visited[i] = true;
-
             if (distances[i] == -1) {
                 pair<int, int> root(i, distances[s] + 1);
                 distances[i] = root.second;
@@ -117,7 +114,7 @@ int calculateRoots() {
             auto res = bfsCached(t1.first);
             auto t2 = res.first;
 
-            pair<int, int> root(t2.first, (int) t2.second / 2);
+            pair<int, int> root(t2.first, std::ceil((double) t2.second / 2));
             for (int depth = 1; depth <= root.second; depth++) {
                 root.first = res.second[root.first];
             }
@@ -149,7 +146,7 @@ int main() {
     std::cin.tie(nullptr);
 
     //std::cin >> vertexCount >> edgeCount;
-    std::cout << createGraph("big_2") << " ";
+    std::cout << createGraph("big_9") << " ";
 
     if (vertexCount <= 2) {
         std::cout << "0";
