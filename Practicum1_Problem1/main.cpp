@@ -1,16 +1,14 @@
 #include <iostream>
-//#include <fstream>
 #include <utility>
 #include <vector>
 #include <queue>
 #include <cmath>
 
 using std::vector;
-using std::queue;
 using std::pair;
 
 int vertexCount, edgeCount;
-vector<int>* graph;
+vector<int> *graph;
 vector<bool> visited;
 vector<pair<int, int>> roots;
 
@@ -22,22 +20,6 @@ void addEdge(int a, int b) {
 static pair<int, int> max(pair<int, int> a, pair<int, int> b) {
     return a.second > b.second ? a : b;
 }
-
-/*int createGraph(const std::string &filename) {
-    std::fstream fs("..\\samples\\" + filename + ".in");
-    fs >> vertexCount >> edgeCount;
-    graph = new vector<int>[vertexCount];
-
-    int a, b;
-    while (fs >> a >> b) {
-        addEdge(a, b);
-    }
-
-    fs = std::fstream("..\\samples\\" + filename + ".out");
-    int expected;
-    fs >> expected;
-    return expected;
-}*/
 
 void createGraph() {
     int a, b;
@@ -51,7 +33,7 @@ pair<int, int> bfs(int s) {
     vector<int> distances(vertexCount, -1);
     distances[s] = 0;
 
-    queue<int> queue;
+    std::queue<int> queue;
     queue.push(s);
 
     pair<int, int> bestRoot(s, 0);
@@ -79,7 +61,7 @@ pair<pair<int, int>, vector<int>> bfsCached(int s) {
     vector<int> distances(vertexCount, -1);
     distances[s] = 0;
 
-    queue<int> queue;
+    std::queue<int> queue;
     queue.push(s);
 
     vector<int> pred(vertexCount);
@@ -109,8 +91,8 @@ int calculateRoots() {
     pair<int, int> bestRoot(0, 0);
 
     for (int i = 0; i < vertexCount; i++) {
-        if (!visited[i] && !graph[i].empty()) {
-            auto t1 = bfs(graph[i][0]);
+        if (!visited[i]) {
+            auto t1 = bfs(i);
             auto res = bfsCached(t1.first);
             auto t2 = res.first;
 
@@ -144,17 +126,13 @@ int calculateLongestPath(int bestRootIndex) {
 int main() {
     std::iostream::sync_with_stdio(false);
     std::cin.tie(nullptr);
-
     std::cin >> vertexCount >> edgeCount;
-    //std::cout << createGraph("big_9") << " ";
 
     if (vertexCount <= 2) {
         std::cout << "0";
-    }
-    else if (edgeCount <= 1) {
+    } else if (edgeCount <= 1) {
         std::cout << "1";
-    }
-    else {
+    } else {
         graph = new vector<int>[vertexCount];
         visited.resize(vertexCount);
 
