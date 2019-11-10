@@ -1,5 +1,5 @@
 #include <iostream>
-#include <fstream>
+//#include <fstream>
 #include <utility>
 #include <vector>
 #include <queue>
@@ -23,7 +23,7 @@ static pair<int, int> max(pair<int, int> a, pair<int, int> b) {
     return a.second > b.second ? a : b;
 }
 
-int createGraph(const std::string &filename) {
+/*int createGraph(const std::string &filename) {
     std::fstream fs("..\\samples\\" + filename + ".in");
     fs >> vertexCount >> edgeCount;
     graph = new vector<int>[vertexCount];
@@ -37,7 +37,7 @@ int createGraph(const std::string &filename) {
     int expected;
     fs >> expected;
     return expected;
-}
+}*/
 
 void createGraph() {
     int a, b;
@@ -145,8 +145,8 @@ int main() {
     std::iostream::sync_with_stdio(false);
     std::cin.tie(nullptr);
 
-    //std::cin >> vertexCount >> edgeCount;
-    std::cout << createGraph("big_9") << " ";
+    std::cin >> vertexCount >> edgeCount;
+    //std::cout << createGraph("big_9") << " ";
 
     if (vertexCount <= 2) {
         std::cout << "0";
@@ -155,10 +155,10 @@ int main() {
         std::cout << "1";
     }
     else {
-        //graph = new vector<int>[vertexCount];
+        graph = new vector<int>[vertexCount];
         visited.resize(vertexCount);
 
-        //createGraph();
+        createGraph();
         int bestRootIndex = calculateRoots();
         connectTrees(bestRootIndex);
         std::cout << calculateLongestPath(bestRootIndex);
