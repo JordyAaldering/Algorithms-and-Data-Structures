@@ -34,6 +34,7 @@ void readStdIn(const string& filename) {
     int n, m;
     fs >> n >> m;
     vertexCount = n + n;
+
     graph = new vector<int>[vertexCount];
     map<string, Person> persons;
 
