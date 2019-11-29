@@ -28,13 +28,13 @@ struct Person {
     Person(string name, int index, bool gender) : name(move(name)), index(index), gender(gender) { }
 };
 
-void readStdIn(const string& filename) {
+string readStdIn(const string& filename) {
     // Replace fs with cin for use with the testing server.
     fstream fs("..\\samples\\" + filename + ".in");
 
     int n, m;
     fs >> n >> m;
-    vertexCount = n + n;
+    vertexCount = n + n + 1;
 
     graph = new vector<int>[vertexCount];
     map<string, Person> persons;
@@ -74,6 +74,34 @@ void readStdIn(const string& filename) {
             }
         }
     }
+
+    for (int i = 0; i < n; i++) {
+        addEdge(vertexCount - 1, i);
+    }
+
+    // Get expected output.
+    fs = fstream("..\\samples\\" + filename + ".out");
+    string expected;
+    fs >> expected;
+    return expected;
+}
+
+bool dfs(int index, bool maximize, bool visited[]) {
+    visited[index] = true;
+
+    bool isLeaf = true;
+    for (int vertex : graph[index]) {
+        if (!visited[vertex]) {
+            if (dfs(vertex, !maximize, visited)) {
+                return true;
+            }
+
+            isLeaf = false;
+        }
+    }
+
+    visited[index] = false;
+    return isLeaf && maximize;
 }
 
 void printGraph() {
@@ -89,11 +117,14 @@ void printGraph() {
 void run(const string& filename) {
     clock_t begin = clock();
 
-    readStdIn(filename);
+    cout << "Expecting " << readStdIn(filename);
+
+    bool visited[vertexCount];
+    bool win = dfs(vertexCount - 1, true, visited);
+    cout << ", got " << (win ? "Veronique" : "Mark") << endl;
     // printGraph();
 
-    clock_t end = clock();
-    cout << filename << " done in " << double(end - begin) / CLOCKS_PER_SEC << " seconds" << endl;
+    // cout << filename << " done in " << double(clock() - begin) / CLOCKS_PER_SEC << " seconds" << endl;
 }
 
 int main() {
@@ -102,7 +133,7 @@ int main() {
     string m[] = { "m1", "m2", "m3", "m4" };
     string r[] = { "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10" };
 
-    for (const string& filename : v) {
+    for (const string& filename : a) {
         run(filename);
     }
 
