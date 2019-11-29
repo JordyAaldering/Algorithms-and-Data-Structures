@@ -1,5 +1,5 @@
 # Generated files
-/.idea/
+*/.idea/
 
 # CMake
-/cmake-build-*/
+*/cmake-build-*/
