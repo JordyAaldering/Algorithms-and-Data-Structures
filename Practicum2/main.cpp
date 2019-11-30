@@ -39,18 +39,21 @@ string readStdIn(const string& filename) {
     graph = new vector<int>[vertexCount];
     map<string, Person> persons;
 
+    // Keep track of the names of all actresses.
     for (int i = 0; i < n; i++) {
         string actress;
         fs >> actress;
         persons[actress] = Person(actress, i, false);
     }
 
+    // Keep track of the names of all actors.
     for (int i = 0; i < n; i++) {
         string actor;
         fs >> actor;
         persons[actor] = Person(actor, n + i, true);
     }
 
+    // Add all casts.
     for (int i = 0; i < m; i++) {
         string movie;
         fs >> movie;
@@ -59,6 +62,7 @@ string readStdIn(const string& filename) {
         fs >> s;
         Person cast[s];
 
+        // Add all stars of a movie.
         for (int j = 0; j < s; j++) {
             string name;
             fs >> name;
@@ -66,6 +70,7 @@ string readStdIn(const string& filename) {
             Person star = persons[name];
             cast[j] = star;
 
+            // Add connections with existing cast.
             for (int k = 0; k < j; k++) {
                 Person costar = persons[cast[k].name];
                 if (star.gender != costar.gender) {
@@ -75,6 +80,7 @@ string readStdIn(const string& filename) {
         }
     }
 
+    // Add root edge to all actresses.
     for (int i = 0; i < n; i++) {
         addEdge(vertexCount - 1, i);
     }
@@ -89,19 +95,19 @@ string readStdIn(const string& filename) {
 bool dfs(int index, bool maximize, bool visited[]) {
     visited[index] = true;
 
-    bool isLeaf = true;
     for (int vertex : graph[index]) {
         if (!visited[vertex]) {
-            if (dfs(vertex, !maximize, visited)) {
-                return true;
+            if (dfs(vertex, !maximize, visited) == maximize) {
+                // An winning path has been found.
+                visited[index] = false;
+                return maximize;
             }
-
-            isLeaf = false;
         }
     }
 
+    // This is a leaf or no solution was found.
     visited[index] = false;
-    return isLeaf && maximize;
+    return !maximize;
 }
 
 void printGraph() {
@@ -120,20 +126,23 @@ void run(const string& filename) {
     cout << "Expecting " << readStdIn(filename);
 
     bool visited[vertexCount];
-    bool win = dfs(vertexCount - 1, true, visited);
-    cout << ", got " << (win ? "Veronique" : "Mark") << endl;
     // printGraph();
+    bool win = dfs(vertexCount - 1, true, visited);
+    cout << ", got " << (win ? "Veronique" : "Mark");
 
-    // cout << filename << " done in " << double(clock() - begin) / CLOCKS_PER_SEC << " seconds" << endl;
+    cout << " (" << double(clock() - begin) / CLOCKS_PER_SEC << "s)" << endl;
 }
 
 int main() {
+    iostream::sync_with_stdio(false);
+    cin.tie(nullptr);
+
     string a[] = { "a1", "a2" };
     string v[] = { "v1", "v2", "v3", "v4" };
     string m[] = { "m1", "m2", "m3", "m4" };
     string r[] = { "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10" };
 
-    for (const string& filename : a) {
+    for (const string& filename : v) {
         run(filename);
     }
 
