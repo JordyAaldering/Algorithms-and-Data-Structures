@@ -3,8 +3,6 @@
 #include <vector>
 #include <tuple>
 #include <map>
-#include <fstream>
-#include <ctime>
 using namespace std;
 
 int vertexCount;
@@ -28,12 +26,9 @@ struct Person {
     Person(string name, int index, bool gender) : name(move(name)), index(index), gender(gender) { }
 };
 
-string readStdIn(const string& filename) {
-    // Replace fs with cin for use with the testing server.
-    fstream fs("..\\samples\\" + filename + ".in");
-
+void readStdIn() {
     int n, m;
-    fs >> n >> m;
+    std::cin >> n >> m;
     vertexCount = n + n + 1;
 
     graph = new vector<int>[vertexCount];
@@ -42,30 +37,30 @@ string readStdIn(const string& filename) {
     // Keep track of the names of all actresses.
     for (int i = 0; i < n; i++) {
         string actress;
-        fs >> actress;
+        std::cin >> actress;
         persons[actress] = Person(actress, i, false);
     }
 
     // Keep track of the names of all actors.
     for (int i = 0; i < n; i++) {
         string actor;
-        fs >> actor;
+        std::cin >> actor;
         persons[actor] = Person(actor, n + i, true);
     }
 
     // Add all casts.
     for (int i = 0; i < m; i++) {
         string movie;
-        fs >> movie;
+        std::cin >> movie;
 
         int s;
-        fs >> s;
+        std::cin >> s;
         Person cast[s];
 
         // Add all stars of a movie.
         for (int j = 0; j < s; j++) {
             string name;
-            fs >> name;
+            std::cin >> name;
 
             Person star = persons[name];
             cast[j] = star;
@@ -84,18 +79,12 @@ string readStdIn(const string& filename) {
     for (int i = 0; i < n; i++) {
         addEdge(vertexCount - 1, i);
     }
-
-    // Get expected output.
-    fs = fstream("..\\samples\\" + filename + ".out");
-    string expected;
-    fs >> expected;
-    return expected;
 }
 
 bool dfs(int index, bool maximize, bool visits[]) {
     visits[index] = true;
 
-    // Check all costars of the other gender.
+    // Check possible choices.
     for (int vertex : graph[index]) {
         if (!visits[vertex]) {
             if (dfs(vertex, !maximize, visits) == maximize) {
@@ -109,44 +98,16 @@ bool dfs(int index, bool maximize, bool visits[]) {
     return !maximize;
 }
 
-void printGraph() {
-    for (int v = 0; v < vertexCount; v++) {
-        cout << "Adjacency list of " << v << " head";
-        for (int x : graph[v]) {
-            cout << " -> " << x;
-        }
-        cout << endl;
-    }
-}
-
-void run(const string& filename) {
-    clock_t begin = clock();
-    cout << "Expecting " << readStdIn(filename);
-
-    //printGraph();
-    bool visited[vertexCount];
-    fill(visited, visited + vertexCount, false);
-    bool win = dfs(vertexCount - 1, true, visited);
-
-    cout << ", got " << (win ? "Veronique" : "Mark");
-    cout << " (" << double(clock() - begin) / CLOCKS_PER_SEC << "s)" << endl;
-}
-
 int main() {
     iostream::sync_with_stdio(false);
     cin.tie(nullptr);
+    readStdIn();
 
-    string a[] = { "a1", "a2" };
-    string v[] = { "v1", "v2", "v3", "v4" };
-    string m[] = { "m1", "m2", "m3", "m4" };
-    string r[] = { "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10" };
-    string all[] = { "a1", "a2", "v1", "v2", "v3", "v4", "m1", "m2", "m3", "m4", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10" };
+    bool visited[vertexCount];
+    fill(visited, visited + vertexCount, false);
 
-    clock_t begin = clock();
-    for (const string& filename : all) {
-        run(filename);
-    }
-    cout << "Total: (" << double(clock() - begin) / CLOCKS_PER_SEC << "s)" << endl;
+    bool win = dfs(vertexCount - 1, true, visited);
+    cout << (win ? "Veronique" : "Mark");
 
     return 0;
 }
