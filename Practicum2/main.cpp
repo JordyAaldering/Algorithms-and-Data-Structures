@@ -1,56 +1,44 @@
 #include <iostream>
-#include <utility>
 #include <vector>
-#include <tuple>
 #include <map>
-using namespace std;
+
+using String = std::string;
+using Vertex = std::vector<int>;
+using Person = std::pair<String, std::pair<int, bool>>;
 
 int vertexCount;
-vector<int>* graph;
+Vertex* graph;
 
 void addEdge(int a, int b) {
     graph[a].push_back(b);
     graph[b].push_back(a);
 }
 
-struct Person {
-    string name;
-    int index;
-    bool gender;
-
-    Person() : name(""), index(0), gender(false) { }
-
-    /// \param name The name of this person.
-    /// \param index This person's index in the graph.
-    /// \param gender This person's gender, where false = female.
-    Person(string name, int index, bool gender) : name(move(name)), index(index), gender(gender) { }
-};
-
 void readStdIn() {
     int n, m;
     std::cin >> n >> m;
     vertexCount = n + n + 1;
 
-    graph = new vector<int>[vertexCount];
-    map<string, Person> persons;
+    graph = new Vertex[vertexCount];
+    std::map<String, Person> persons;
 
     // Keep track of the names of all actresses.
     for (int i = 0; i < n; i++) {
-        string actress;
+        String actress;
         std::cin >> actress;
-        persons[actress] = Person(actress, i, false);
+        persons[actress] = std::make_pair(actress, std::make_pair(i, false));
     }
 
     // Keep track of the names of all actors.
     for (int i = 0; i < n; i++) {
-        string actor;
+        String actor;
         std::cin >> actor;
-        persons[actor] = Person(actor, n + i, true);
+        persons[actor] = std::make_pair(actor, std::make_pair(n + i, true));
     }
 
     // Add all casts.
     for (int i = 0; i < m; i++) {
-        string movie;
+        String movie;
         std::cin >> movie;
 
         int s;
@@ -59,7 +47,7 @@ void readStdIn() {
 
         // Add all stars of a movie.
         for (int j = 0; j < s; j++) {
-            string name;
+            String name;
             std::cin >> name;
 
             Person star = persons[name];
@@ -67,9 +55,9 @@ void readStdIn() {
 
             // Add connections with existing cast.
             for (int k = 0; k < j; k++) {
-                Person costar = persons[cast[k].name];
-                if (star.gender != costar.gender) {
-                    addEdge(star.index, costar.index);
+                Person costar = persons[cast[k].first];
+                if (star.second.second != costar.second.second) {
+                    addEdge(star.second.first, costar.second.first);
                 }
             }
         }
@@ -99,15 +87,15 @@ bool dfs(int index, bool maximize, bool visits[]) {
 }
 
 int main() {
-    iostream::sync_with_stdio(false);
-    cin.tie(nullptr);
+    std::iostream::sync_with_stdio(false);
+    std::cin.tie(nullptr);
     readStdIn();
 
     bool visited[vertexCount];
-    fill(visited, visited + vertexCount, false);
+    std::fill(visited, visited + vertexCount, false);
 
     bool win = dfs(vertexCount - 1, true, visited);
-    cout << (win ? "Veronique" : "Mark");
+    std::cout << (win ? "Veronique" : "Mark");
 
     return 0;
 }
