@@ -92,21 +92,22 @@ string readStdIn(const string& filename) {
     return expected;
 }
 
-bool dfs(int index, bool maximize, bool visited[]) {
-    visited[index] = true;
+bool dfs(int index, bool maximize, int visits[]) {
+    visits[index]++;
 
+    // Check all costars of the other gender.
     for (int vertex : graph[index]) {
-        if (!visited[vertex]) {
-            if (dfs(vertex, !maximize, visited) == maximize) {
+        if (visits[vertex] == 0) {
+            if (dfs(vertex, !maximize, visits) == maximize) {
                 // An winning path has been found.
-                visited[index] = false;
+                visits[index]--;
                 return maximize;
             }
         }
     }
 
     // This is a leaf or no solution was found.
-    visited[index] = false;
+    visits[index]--;
     return !maximize;
 }
 
@@ -122,14 +123,14 @@ void printGraph() {
 
 void run(const string& filename) {
     clock_t begin = clock();
-
     cout << "Expecting " << readStdIn(filename);
 
-    bool visited[vertexCount];
-    // printGraph();
-    bool win = dfs(vertexCount - 1, true, visited);
-    cout << ", got " << (win ? "Veronique" : "Mark");
+    //printGraph();
+    int visits[vertexCount];
+    fill(visits, visits + vertexCount, 0);
+    bool win = dfs(vertexCount - 1, true, visits);
 
+    cout << ", got " << (win ? "Veronique" : "Mark");
     cout << " (" << double(clock() - begin) / CLOCKS_PER_SEC << "s)" << endl;
 }
 
@@ -142,7 +143,7 @@ int main() {
     string m[] = { "m1", "m2", "m3", "m4" };
     string r[] = { "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10" };
 
-    for (const string& filename : v) {
+    for (const string& filename : a) {
         run(filename);
     }
 
