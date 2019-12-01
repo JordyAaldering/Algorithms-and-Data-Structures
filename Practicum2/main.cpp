@@ -22,21 +22,21 @@ void readStdIn() {
     graph = new Vertex[vertexCount];
     std::map<String, Person> persons;
 
-    // Keep track of the names of all actresses.
+    // Keep track of actresses.
     for (int i = 0; i < n; i++) {
         String actress;
         std::cin >> actress;
         persons[actress] = std::make_pair(actress, std::make_pair(i, false));
     }
 
-    // Keep track of the names of all actors.
+    // Keep track of actors.
     for (int i = 0; i < n; i++) {
         String actor;
         std::cin >> actor;
         persons[actor] = std::make_pair(actor, std::make_pair(n + i, true));
     }
 
-    // Add all casts.
+    // Add casts of all movies.
     for (int i = 0; i < m; i++) {
         String movie;
         std::cin >> movie;
@@ -69,13 +69,13 @@ void readStdIn() {
     }
 }
 
-bool dfs(int index, bool maximize, bool visits[]) {
-    visits[index] = true;
+bool minimax(int index, bool maximize, bool *visited) {
+    visited[index] = true;
 
     // Check possible choices.
     for (int vertex : graph[index]) {
-        if (!visits[vertex]) {
-            if (dfs(vertex, !maximize, visits) == maximize) {
+        if (!visited[vertex]) {
+            if (minimax(vertex, !maximize, visited) == maximize) {
                 // A winning path has been found.
                 return maximize;
             }
@@ -94,7 +94,7 @@ int main() {
     bool visited[vertexCount];
     std::fill(visited, visited + vertexCount, false);
 
-    bool win = dfs(vertexCount - 1, true, visited);
+    bool win = minimax(vertexCount - 1, true, visited);
     std::cout << (win ? "Veronique" : "Mark");
 
     return 0;
