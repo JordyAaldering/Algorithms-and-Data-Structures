@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <fstream>
 
 using String = std::string;
 using Vertex = std::vector<int>;
@@ -14,9 +15,11 @@ void addEdge(int a, int b) {
     graph[b].push_back(a);
 }
 
-void readStdIn() {
+String readStdIn(const String& filename) {
+    std::fstream fs("..\\samples\\" + filename + ".in");
+
     int n, m;
-    std::cin >> n >> m;
+    fs >> n >> m;
     vertexCount = n + n + 1;
 
     graph = new Vertex[vertexCount];
@@ -25,30 +28,30 @@ void readStdIn() {
     // Keep track of actresses.
     for (int i = 0; i < n; i++) {
         String actress;
-        std::cin >> actress;
+        fs >> actress;
         persons[actress] = std::make_pair(actress, std::make_pair(i, false));
     }
 
     // Keep track of actors.
     for (int i = 0; i < n; i++) {
         String actor;
-        std::cin >> actor;
+        fs >> actor;
         persons[actor] = std::make_pair(actor, std::make_pair(n + i, true));
     }
 
     // Add casts of all movies.
     for (int i = 0; i < m; i++) {
         String movie;
-        std::cin >> movie;
+        fs >> movie;
 
         int s;
-        std::cin >> s;
+        fs >> s;
         Person cast[s];
 
         // Add all stars of a movie.
         for (int j = 0; j < s; j++) {
             String name;
-            std::cin >> name;
+            fs >> name;
 
             Person star = persons[name];
             cast[j] = star;
@@ -67,6 +70,11 @@ void readStdIn() {
     for (int i = 0; i < n; i++) {
         addEdge(vertexCount - 1, i);
     }
+
+    fs = std::fstream("..\\samples\\" + filename + ".out");
+    String expected;
+    fs >> expected;
+    return expected;
 }
 
 bool minimax(int index, bool maximize, bool *visited) {
@@ -86,16 +94,30 @@ bool minimax(int index, bool maximize, bool *visited) {
     return !maximize;
 }
 
-int main() {
-    std::iostream::sync_with_stdio(false);
-    std::cin.tie(nullptr);
-    readStdIn();
+void run(const String& filename) {
+    std::cout << "Expecting " << readStdIn(filename) << " got ";
 
     bool visited[vertexCount];
     std::fill(visited, visited + vertexCount, false);
 
     bool win = minimax(vertexCount - 1, true, visited);
-    std::cout << (win ? "Veronique" : "Mark");
+    std::cout << (win ? "Veronique" : "Mark") << std::endl;
+}
+
+int main() {
+    std::iostream::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
+    String a[] = { "a1", "a2" };
+    String b[] = { "b1", "b2" };
+    String v[] = { "v1", "v2", "v3", "v4" };
+    String m[] = { "m1", "m2", "m3", "m4" };
+    String r[] = { "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10" };
+    String all[] = { "a1", "a2", "b1", "b2", "v1", "v2", "v3", "v4", "m1", "m2", "m3", "m4", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10" };
+
+    for (const String& filename : all) {
+        run(filename);
+    }
 
     return 0;
 }
