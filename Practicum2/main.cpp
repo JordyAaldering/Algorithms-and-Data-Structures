@@ -68,7 +68,7 @@ String readStdIn(const String& filename) {
 
     // Add root edge to all actresses.
     for (int i = 0; i < n; i++) {
-        addEdge(vertexCount - 1, i);
+        graph[vertexCount - 1].push_back(i);
     }
 
     fs = std::fstream("..\\samples\\" + filename + ".out");
