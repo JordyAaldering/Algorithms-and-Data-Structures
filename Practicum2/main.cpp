@@ -77,17 +77,40 @@ String readStdIn(const String& filename) {
     return expected;
 }
 
-bool minimax(int index, bool maximize, bool *visited) {
+bool minimax(int index, bool maximize, bool *visited, std::vector<int>& path) {
     visited[index] = true;
+    path.push_back(index);
 
     // Check possible choices.
+    bool goodChoice = false;
+    bool setVisitedToFalse = false;
+
     for (int vertex : graph[index]) {
         if (!visited[vertex]) {
-            if (minimax(vertex, !maximize, visited) == maximize) {
+            if (minimax(vertex, !maximize, visited, path) == maximize) {
                 // A winning path has been found.
-                return maximize;
+                //return maximize;
+                goodChoice = true;
+                break;
             }
         }
+        else if (vertex != path[path.size() - 1]) {
+            for (int neighbor : path){
+                if (vertex == neighbor) {
+                    setVisitedToFalse = true;
+                }
+            }
+        }
+    }
+
+    path.pop_back();
+
+    if (setVisitedToFalse) {
+        visited[index] = false;
+    }
+
+    if (goodChoice) {
+        return maximize;
     }
 
     // This is a leaf or no solution was found.
@@ -99,8 +122,9 @@ void run(const String& filename) {
 
     bool visited[vertexCount];
     std::fill(visited, visited + vertexCount, false);
+    std::vector<int> path(vertexCount);
 
-    bool win = minimax(vertexCount - 1, true, visited);
+    bool win = minimax(vertexCount - 1, true, visited, path);
     std::cout << (win ? "Veronique" : "Mark") << std::endl;
 }
 

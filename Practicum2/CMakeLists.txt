@@ -3,4 +3,4 @@ project(Practicum2)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(Practicum2 main.cpp submit.cpp)
+add_executable(Practicum2 main.cpp)
