@@ -90,7 +90,7 @@ int bpmMax() {
     bool visited[vertexCount];
     int assigned[vertexCount];
     std::fill(assigned, assigned + vertexCount, -1);
-    
+
     int result = 0;
     for (int i = 0; i < n; i++) {
         std::fill(visited, visited + vertexCount, false);
@@ -101,6 +101,12 @@ int bpmMax() {
     }
 
     return result;
+}
+
+bool allBpmContain(int v) {
+    // something
+
+    return true;
 }
 
 int main() {
@@ -116,8 +122,16 @@ int main() {
 
     for (const String& filename : all) {
         std::cout << "Expecting " << readStdIn(filename) << " got ";
-        std::cout << bpmMax() << std::endl;
-        //std::cout << (true ? "Veronique" : "Mark") << std::endl;
+
+        bool win = false;
+        for (int i = 0; i < n; i++) {
+            if (allBpmContain(i)) {
+                win = true;
+                break;
+            }
+        }
+
+        std::cout << (win ? "Veronique" : "Mark") << std::endl;
     }
 
     return 0;
