@@ -7,7 +7,7 @@ using String = std::string;
 using Vertex = std::vector<int>;
 using Person = std::pair<String, std::pair<int, bool>>;
 
-int m, n, vertexCount;
+int vertexCount;
 Vertex* graph;
 
 void addEdge(int a, int b) {
@@ -18,8 +18,9 @@ void addEdge(int a, int b) {
 String readStdIn(const String& filename) {
     std::fstream fs("..\\samples\\" + filename + ".in");
 
+    int n, m;
     fs >> n >> m;
-    vertexCount = n + n;// + 1;
+    vertexCount = n + n;
 
     graph = new Vertex[vertexCount];
     std::map<String, Person> persons;
@@ -65,87 +66,10 @@ String readStdIn(const String& filename) {
         }
     }
 
-    // Add root edge to all actresses.
-    /*for (int i = 0; i < n; i++) {
-        graph[vertexCount - 1].push_back(i);
-    }*/
-
     fs = std::fstream("..\\samples\\" + filename + ".out");
     String expected;
     fs >> expected;
     return expected;
-}
-
-bool minimax(int index, bool maximize, bool *visited, std::vector<int>& path) {
-    visited[index] = true;
-    path.push_back(index);
-
-    // Check possible choices.
-    bool goodChoice = false;
-    bool setVisitedToFalse = false;
-
-    for (int vertex : graph[index]) {
-        if (!visited[vertex]) {
-            if (minimax(vertex, !maximize, visited, path) == maximize) {
-                // A winning path has been found.
-                //return maximize;
-                goodChoice = true;
-                break;
-            }
-        }
-        else if (vertex != path[path.size() - 1]) {
-            for (int neighbor : path){
-                if (vertex == neighbor) {
-                    setVisitedToFalse = true;
-                }
-            }
-        }
-    }
-
-    path.pop_back();
-
-    if (setVisitedToFalse) {
-        visited[index] = false;
-    }
-
-    if (goodChoice) {
-        return maximize;
-    }
-
-    // This is a leaf or no solution was found.
-    return !maximize;
-}
-
-bool minimaxSimple(int index, bool maximize, bool *visited) {
-    visited[index] = true;
-
-    for (int vertex : graph[index]) {
-        if (!visited[vertex]) {
-            if (minimaxSimple(vertex, !maximize, visited) == maximize) {
-                return maximize;
-            }
-        }
-    }
-
-    // This is a leaf or no solution was found.
-    return !maximize;
-}
-
-bool minimaxInit() {
-    bool visited[vertexCount];
-    std::vector<int> path(vertexCount);
-
-    for (int i = 0; i < n; i++) {
-        std::fill(visited, visited + vertexCount, false);
-        path.clear();
-
-        //if (minimax(i, false, visited, path)) {
-        if (minimaxSimple(i, false, visited)) {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 int main() {
@@ -155,13 +79,12 @@ int main() {
     String a[] = { "a1", "a2" };
     String b[] = { "b1", "b2" };
     String v[] = { "v1", "v2", "v3", "v4" };
-    String mm[] = { "m1", "m2", "m3", "m4" };
+    String m[] = { "m1", "m2", "m3", "m4" };
     String r[] = { "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10" };
     String all[] = { "a1", "a2", "b1", "b2", "v1", "v2", "v3", "v4", "m1", "m2", "m3", "m4", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10" };
 
     for (const String& filename : all) {
-        std::cout << "Expecting " << readStdIn(filename) << " got ";
-        std::cout << (minimaxInit() ? "Veronique" : "Mark") << std::endl;
+        
     }
 
     return 0;
