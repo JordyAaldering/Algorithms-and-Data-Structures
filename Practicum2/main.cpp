@@ -7,7 +7,7 @@ using String = std::string;
 using Vertex = std::vector<int>;
 using Person = std::pair<String, std::pair<int, bool>>;
 
-int vertexCount;
+int n, m, vertexCount;
 Vertex* graph;
 
 void addEdge(int a, int b) {
@@ -18,7 +18,6 @@ void addEdge(int a, int b) {
 String readStdIn(const String& filename) {
     std::fstream fs("..\\samples\\" + filename + ".in");
 
-    int n, m;
     fs >> n >> m;
     vertexCount = n + n;
 
@@ -72,6 +71,38 @@ String readStdIn(const String& filename) {
     return expected;
 }
 
+bool bpm(int index, bool* visited, int* assigned) {
+    for (int vertex : graph[index]) {
+        if (!visited[vertex]) {
+            visited[vertex] = true;
+
+            if (assigned[vertex] < 0 || bpm(assigned[vertex], visited, assigned)) {
+                assigned[vertex] = index;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+int bpmMax() {
+    bool visited[vertexCount];
+    int assigned[vertexCount];
+    std::fill(assigned, assigned + vertexCount, -1);
+    
+    int result = 0;
+    for (int i = 0; i < n; i++) {
+        std::fill(visited, visited + vertexCount, false);
+
+        if (bpm(i, visited, assigned)) {
+            result++;
+        }
+    }
+
+    return result;
+}
+
 int main() {
     std::iostream::sync_with_stdio(false);
     std::cin.tie(nullptr);
@@ -79,12 +110,14 @@ int main() {
     String a[] = { "a1", "a2" };
     String b[] = { "b1", "b2" };
     String v[] = { "v1", "v2", "v3", "v4" };
-    String m[] = { "m1", "m2", "m3", "m4" };
+    String mm[] = { "m1", "m2", "m3", "m4" };
     String r[] = { "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10" };
     String all[] = { "a1", "a2", "b1", "b2", "v1", "v2", "v3", "v4", "m1", "m2", "m3", "m4", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10" };
 
     for (const String& filename : all) {
-        
+        std::cout << "Expecting " << readStdIn(filename) << " got ";
+        std::cout << bpmMax() << std::endl;
+        //std::cout << (true ? "Veronique" : "Mark") << std::endl;
     }
 
     return 0;
