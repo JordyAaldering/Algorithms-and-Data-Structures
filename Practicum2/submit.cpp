@@ -22,21 +22,18 @@ void readStdIn() {
     graph = new Vertex[vertexCount];
     std::map<String, Person> persons;
 
-    // Keep track of actresses.
     for (short i = 0; i < n; i++) {
         String actress;
         std::cin >> actress;
         persons[actress] = std::make_pair(actress, std::make_pair(i, false));
     }
 
-    // Keep track of actors.
     for (short i = 0; i < n; i++) {
         String actor;
         std::cin >> actor;
         persons[actor] = std::make_pair(actor, std::make_pair(n + i, true));
     }
 
-    // Add casts of all movies.
     for (short i = 0; i < m; i++) {
         String movie;
         std::cin >> movie;
@@ -45,7 +42,6 @@ void readStdIn() {
         std::cin >> s;
         Person cast[s];
 
-        // Add all stars of a movie.
         for (short j = 0; j < s; j++) {
             String name;
             std::cin >> name;
@@ -53,7 +49,6 @@ void readStdIn() {
             Person star = persons[name];
             cast[j] = star;
 
-            // Add connections with existing cast.
             for (short k = 0; k < j; k++) {
                 Person costar = persons[cast[k].first];
                 if (star.second.second != costar.second.second) {
