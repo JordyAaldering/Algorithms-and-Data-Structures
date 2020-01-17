@@ -1,14 +1,14 @@
 #include <vector>
 #include <queue>
 
-void bfs(std::vector<int>* adj, int i = 0)
-{
-    bool visited[adj->size()];
-    std::fill(visited, visited + adj->size(), false);
+void bfs(std::vector<int>* adj, int i) {
+    int size = adj->size();
+
+    bool visited[size];
+    std::fill(visited, visited + size, false);
+    visited[i] = true;
 
     std::queue<int> queue;
-
-    visited[i] = true;
     queue.push(i);
 
     while(!queue.empty()) {
@@ -20,6 +20,16 @@ void bfs(std::vector<int>* adj, int i = 0)
                 visited[v] = true;
                 queue.push(v);
             }
+        }
+    }
+}
+
+void dfs(std::vector<int>* adj, int i, bool* visited) {
+    visited[i] = true;
+
+    for (int v : adj[i]) {
+        if (!visited[v]) {
+            dfs(adj, v, visited);
         }
     }
 }
