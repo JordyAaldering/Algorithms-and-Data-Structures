@@ -1,5 +1,5 @@
 #include <vector>
-#include<climits>
+#include <climits>
 
 int minDistance(const int* distance, const bool* isSet, int size) {
     int minDistance = distance[0];
@@ -46,13 +46,14 @@ void bellmanFord(int** graph, int size, int src = 0) {
     distance[src] = 0;
 
     for (int step = 0; step < size - 1; step++) {
-        for (int u = 0; u < size; u++)
-        for (int v = 0; v < size; v++) {
-            if (graph[u][v] && distance[u] < INT_MAX) {
-                int currentDistance = distance[u] + graph[u][v];
+        for (int u = 0; u < size; u++) {
+            for (int v = 0; v < size; v++) {
+                if (graph[u][v] && distance[u] < INT_MAX) {
+                    int currentDistance = distance[u] + graph[u][v];
 
-                if (currentDistance < distance[v]) {
-                    distance[v] = currentDistance;
+                    if (currentDistance < distance[v]) {
+                        distance[v] = currentDistance;
+                    }
                 }
             }
         }
