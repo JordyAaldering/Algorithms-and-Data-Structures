@@ -2,5 +2,7 @@
 * text=auto
 
 # Unmark paths to be ignored for the repository's language statistics
-Practicum1/samples/ linguist-generated=false
-Practicum2/samples/ linguist-generated=false
+Practicum1/samples/*.in linguist-generated=false
+Practicum1/samples/*.out linguist-generated=false
+Practicum2/samples/*.in linguist-generated=false
+Practicum2/samples/*.out linguist-generated=false
