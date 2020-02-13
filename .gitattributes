@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Unmark paths to be ignored for the repository's language statistics
+Practicum1/samples/* linguist-generated=false
+Practicum2/samples/* linguist-generated=false
